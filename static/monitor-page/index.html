@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1024">
+<title>Windows XP</title>
+<style>
+/* ================================================
+   Windows XP Luna Theme — Authentic Recreation
+   ================================================ */
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: Tahoma, 'MS Sans Serif', Arial, sans-serif;
+  font-size: 11px;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  cursor: none;
+  user-select: none;
+  background: #000;
+}
+
+/* ── Custom Cursor ─────────────────────────────── */
+#cursor {
+  position: fixed;
+  width: 20px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 99999;
+  top: 0; left: 0;
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
+}
+
+/* ── Desktop Background (Bliss) ────────────────── */
+#desktop-bg {
+  position: fixed;
+  inset: 0 0 30px 0;
+  overflow: hidden;
+}
+
+/* ── Desktop Icon Area ─────────────────────────── */
+#desktop {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 8px 4px;
+  gap: 2px;
+}
+
+.dicon {
+  width: 78px;
+  min-height: 74px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px 3px 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-align: center;
+  gap: 3px;
+  border-radius: 1px;
+}
+.dicon:hover  { background: rgba(49,106,197,.35); border-color: rgba(49,106,197,.7); }
+.dicon.sel    { background: rgba(49,106,197,.55); border-color: rgba(49,106,197,.9); }
+
+.dicon-img { width:32px; height:32px; flex-shrink:0; }
+
+.dicon-lbl {
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.2;
+  text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
+  word-break: break-word;
+  max-width: 74px;
+  padding: 1px 2px;
+}
+.dicon.sel .dicon-lbl { background:#316AC5; color:#fff; text-shadow:none; }
+
+/* ── XP Window ─────────────────────────────────── */
+.xpwin {
+  position: absolute;
+  display: none;
+  min-width: 320px;
+  min-height: 200px;
+  /* Outer blue frame border */
+  border: 3px solid #84ADCE;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 3px 3px 14px rgba(0,0,0,.55);
+  overflow: hidden;
+  background: #ECE9D8;
+}
+.xpwin.active {
+  z-index: 200;
+  border-color: #6BA3C8;
+}
+.xpwin.maximized {
+  border-radius: 0 !important;
+  border: none !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: calc(100vh - 30px) !important;
+}
+
+/* Title Bar */
+.win-tb {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px 0 4px;
+  cursor: move;
+  position: relative;
+  border-bottom: 1px solid #003699;
+}
+/* Active Luna blue gradient */
+.xpwin.active .win-tb {
+  background: linear-gradient(to bottom,
+    #2A8FE8 0%, #1472D4 3%, #0A58C5 7%,
+    #0855C2 50%, #0040A8 51%, #003299 100%);
+}
+/* Inactive muted blue-gray */
+.xpwin:not(.active) .win-tb {
+  background: linear-gradient(to bottom,
+    #8FA8CC 0%, #7B96BE 4%, #6E88B3 50%,
+    #607AAA 51%, #4D6898 100%);
+  border-bottom-color: #4D6898;
+}
+/* Subtle highlight stripe */
+.win-tb::after {
+  content:'';
+  position:absolute;
+  top:1px; left:8px; right:8px; height:1px;
+  background: rgba(255,255,255,.4);
+  pointer-events:none;
+}
+
+.win-tb-icon { width:16px; height:16px; margin-right:3px; flex-shrink:0; }
+
+.win-tb-title {
+  flex:1;
+  color:#fff;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,.6);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.xpwin:not(.active) .win-tb-title { text-shadow: 1px 1px 2px rgba(0,0,0,.3); }
+
+/* Title bar buttons */
+.win-btns { display:flex; gap:2px; align-items:center; }
+
+.wbtn {
+  width: 21px; height: 21px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,.4);
+  cursor: pointer;
+  font-size: 11px; font-weight: bold;
+  display: flex; align-items:center; justify-content:center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+  position: relative;
+  font-family: Tahoma, sans-serif;
+  color: #000;
+}
+.wbtn.wmin, .wbtn.wmax {
+  background: linear-gradient(to bottom, #F0D44A 0%, #E5B828 55%, #D4A820 55%, #C99A18 100%);
+}
+.wbtn.wclose {
+  background: linear-gradient(to bottom, #FA9898 0%, #E03535 55%, #C82020 55%, #B81A1A 100%);
+  color: #fff;
+  border-color: rgba(100,0,0,.5);
+}
+.wbtn:hover { filter: brightness(1.15); }
+.wbtn:active { filter: brightness(.85); box-shadow: inset 0 1px 3px rgba(0,0,0,.4); }
+
+/* Menu Bar */
+.win-menu {
+  height: 21px;
+  background: #ECE9D8;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid #ACA899;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+.mitem {
+  padding: 0 7px;
+  display: flex; align-items: center;
+  font-size: 11px; cursor: default;
+  color: #000; height: 100%;
+  white-space: nowrap;
+}
+.mitem:hover { background:#316AC5; color:#fff; }
+.mitem.disabled { color:#A0A0A0; }
+.mitem.disabled:hover { background:transparent; color:#A0A0A0; }
+
+/* Toolbar */
+.win-toolbar {
+  height: 26px;
+  background: #ECE9D8;
+  display: flex; align-items: center;
+  padding: 2px 3px;
+  border-bottom: 1px solid #ACA899;
+  gap: 1px; flex-shrink: 0;
+}
+.tbtn {
+  height: 22px; min-width: 24px;
+  padding: 0 6px;
+  background: transparent;
+  border: 1px solid transparent; border-radius: 2px;
+  cursor: pointer; font-size: 11px;
+  display: flex; align-items:center; gap:3px;
+  font-family: Tahoma, sans-serif; color: #000;
+  white-space: nowrap;
+}
+.tbtn:hover { background:linear-gradient(to bottom,#EEF5FF 0%,#D0E4FF 100%); border-color:#97BBDF; }
+.tbtn:active { background:linear-gradient(to bottom,#D0E4FF 0%,#C0D9FF 100%); }
+.tbtn:disabled, .tbtn.dis { opacity:.4; cursor:default; }
+.tbtn.dis:hover { background:transparent; border-color:transparent; }
+.tsep { width:1px; height:18px; background:#ACA899; margin:0 3px; }
+
+/* Address Bar */
+.win-addr {
+  height: 24px;
+  background: #ECE9D8;
+  display: flex; align-items: center;
+  padding: 2px 4px; gap: 4px;
+  border-bottom: 1px solid #ACA899;
+  flex-shrink: 0;
+}
+.addr-lbl { font-size:11px; white-space:nowrap; }
+.addr-inp {
+  flex:1; height:19px;
+  border: 1px solid #7F9DB9;
+  padding: 0 4px;
+  font-family: Tahoma, sans-serif; font-size: 11px;
+  background: #fff; outline: none; border-radius: 0;
+}
+.addr-go {
+  height:19px; padding:0 6px;
+  background: linear-gradient(to bottom,#ECE9D8 0%,#D4D0C8 100%);
+  border: 1px solid #7F9DB9;
+  font-family: Tahoma, sans-serif; font-size: 11px;
+  cursor: pointer;
+}
+
+/* Window Body */
+.win-body {
+  display: flex;
+  overflow: hidden;
+  flex: 1;
+}
+
+.win-sidebar {
+  width: 160px;
+  background: #EEF3FB;
+  border-right: 1px solid #C4D5EA;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sb-sec-hdr {
+  background: linear-gradient(to right,#2B6EBF 0%,#5099D8 70%,#7EBDEE 100%);
+  color: #fff; font-size: 11px; font-weight: bold;
+  padding: 4px 8px; cursor: pointer;
+  display: flex; justify-content:space-between; align-items:center;
+}
+.sb-sec-body { padding: 4px 0; }
+.sb-link {
+  padding: 2px 6px 2px 18px;
+  font-size: 11px; color: #0645AD;
+  cursor: pointer; display: flex; align-items:center; gap:4px;
+}
+.sb-link:hover { text-decoration: underline; }
+.sb-details { padding:8px; }
+.sb-details-icon { font-size:28px; text-align:center; margin-bottom:4px; }
+.sb-details-name { font-size:11px; font-weight:bold; margin-bottom:2px; }
+.sb-details-info { font-size:10px; color:#555; }
+
+.win-content {
+  flex:1; overflow-y:auto; overflow-x:auto;
+  padding: 12px; font-size: 12px; line-height: 1.5;
+  background: #fff;
+}
+
+/* XP scrollbar */
+.win-content::-webkit-scrollbar,
+.win-sidebar::-webkit-scrollbar { width:17px; }
+.win-content::-webkit-scrollbar-track,
+.win-sidebar::-webkit-scrollbar-track {
+  background: #F0EFE4; border-left:1px solid #9FB4C8;
+}
+.win-content::-webkit-scrollbar-button,
+.win-sidebar::-webkit-scrollbar-button {
+  background: linear-gradient(to bottom,#ECE9D8 0%,#C0BDB5 100%);
+  height:17px; border:1px solid #9FB4C8;
+  display:block;
+}
+.win-content::-webkit-scrollbar-thumb,
+.win-sidebar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right,
+    #C0D5EE 0%,#7BB0D8 30%,#5A99CC 50%,#7BB0D8 70%,#C0D5EE 100%);
+  border:1px solid #7FA8CC;
+}
+.win-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to right,
+    #AACBE8 0%,#6AA0C8 30%,#4A89BC 50%,#6AA0C8 70%,#AACBE8 100%);
+}
+
+/* Status Bar */
+.win-status {
+  height: 20px;
+  background: #ECE9D8;
+  border-top: 1px solid #ACA899;
+  display: flex; align-items:center;
+  flex-shrink: 0;
+}
+.status-pane {
+  padding: 0 8px; font-size:11px;
+  border-right: 1px solid #ACA899; height:100%;
+  display:flex; align-items:center; gap:3px;
+}
+.status-pane:last-child { border-right:none; }
+
+/* ── Content Styles ────────────────────────────── */
+.xp-h2 {
+  font-size:14px; font-weight:bold; color:#003399;
+  border-bottom:2px solid #3169C6;
+  padding-bottom:5px; margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
+}
+.xp-h3 { font-size:12px; font-weight:bold; color:#003399; margin:12px 0 6px; }
+.infobox {
+  background:#F7F9FE; border:1px solid #C9D8F0;
+  border-left:3px solid #3169C6;
+  padding:5px 9px; margin:5px 0;
+  border-radius:0 2px 2px 0;
+}
+.infobox strong { color:#003399; }
+
+.skill-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:8px 0; }
+.skill-tag {
+  background:linear-gradient(to bottom,#F5F5F5 0%,#E8E8E8 100%);
+  border:1px solid #C0C0C0; padding:4px 8px;
+  font-size:11px; border-radius:1px;
+  box-shadow:0 1px 2px rgba(0,0,0,.1);
+  display:flex; align-items:center; gap:5px;
+}
+
+.proj-card {
+  background:linear-gradient(to bottom,#fff 0%,#F8F8F8 100%);
+  border:1px solid #D0D0D0; padding:8px 10px;
+  margin:8px 0; box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+.proj-card-title { font-weight:bold; color:#003399; font-size:12px; margin-bottom:4px; }
+.proj-card p { color:#333; font-size:11px; line-height:1.5; }
+
+/* ── Taskbar ───────────────────────────────────── */
+#taskbar {
+  position: fixed;
+  bottom:0; left:0; right:0; height:30px;
+  background: linear-gradient(to bottom,
+    #2B5FAF 0%, #2258B8 4%, #1B4DB0 50%,
+    #153EA0 51%, #102F96 100%);
+  border-top: 2px solid #2B6BC8;
+  display:flex; align-items:center;
+  z-index: 9000;
+  box-shadow: 0 -1px 4px rgba(0,0,0,.4);
+}
+
+/* Start Button */
+#start-btn {
+  height: 100%;
+  padding: 0 10px 0 5px;
+  background: linear-gradient(to bottom,
+    #6CBD2A 0%, #5AB022 30%,
+    #338012 50%, #2D7912 51%, #226A08 100%);
+  border: none;
+  border-right: 1px solid #1A5E06;
+  cursor: pointer;
+  display: flex; align-items:center; gap:5px;
+  color: #fff; font-weight: bold;
+  font-size: 14px; font-style: italic;
+  font-family: Tahoma, sans-serif;
+  text-shadow: 1px 1px 3px rgba(0,0,0,.5);
+  border-radius: 0 8px 8px 0;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+  letter-spacing: .5px;
+}
+#start-btn:hover {
+  background: linear-gradient(to bottom,
+    #7CCD3A 0%, #6AC032 30%,
+    #439021 50%, #3D8821 51%, #327D16 100%);
+}
+#start-btn.active {
+  background: linear-gradient(to bottom,
+    #4EAE14 0%, #469C12 30%,
+    #266101 50%, #205901 51%, #164D00 100%);
+  box-shadow: inset 0 2px 3px rgba(0,0,0,.4);
+}
+
+/* Quick Launch */
+#ql {
+  display:flex; align-items:center;
+  padding: 0 3px;
+  border-right: 2px solid rgba(0,0,0,.3);
+  border-left: 1px solid rgba(255,255,255,.15);
+  gap: 2px; height:100%; flex-shrink:0;
+}
+.ql-btn {
+  width:22px; height:22px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; border-radius:2px; font-size:15px;
+}
+.ql-btn:hover { background:rgba(255,255,255,.2); }
+
+/* Taskbar window buttons */
+#tb-btns {
+  flex:1; display:flex; align-items:center;
+  padding:0 4px; gap:3px; min-width:0; height:100%;
+}
+.tb-winbtn {
+  height:22px; min-width:100px; max-width:160px;
+  padding:0 6px;
+  background:linear-gradient(to bottom,
+    #698FC8 0%,#507FC0 50%,#3C6CB4 51%,#2D5CA6 100%);
+  border:1px solid #2857B0; border-radius:3px;
+  color:#fff; font-size:11px; font-family:Tahoma,sans-serif;
+  cursor:pointer; display:flex; align-items:center; gap:4px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+  flex-shrink:0;
+}
+.tb-winbtn:hover {
+  background:linear-gradient(to bottom,
+    #7A9FD8 0%,#608FD0 50%,#4C7CC4 51%,#3D6CB6 100%);
+}
+.tb-winbtn.active {
+  background:linear-gradient(to bottom,
+    #3C6CB4 0%,#2C5CA6 50%,#1F4D96 51%,#1A4390 100%);
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.3);
+  border-color:#1A4390;
+}
+.tb-winbtn-ico { width:14px; height:14px; flex-shrink:0; }
+.tb-winbtn-txt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* System Tray */
+#systray {
+  display:flex; align-items:center;
+  padding:0 8px; height:100%;
+  background:linear-gradient(to bottom,
+    #1254AC 0%, #0A4499 50%, #083B90 100%);
+  border-left:1px solid rgba(255,255,255,.12);
+  gap:6px; flex-shrink:0;
+}
+.tray-ico { width:16px; height:16px; cursor:pointer; opacity:.9; }
+.tray-ico:hover { opacity:1; }
+#tray-clock {
+  color:#fff; font-size:11px; font-family:Tahoma,sans-serif;
+  text-align:center; white-space:nowrap; cursor:default;
+  line-height:1.25;
+}
+
+/* ── Start Menu ────────────────────────────────── */
+#start-menu {
+  position:fixed; bottom:30px; left:0;
+  width:380px;
+  border:2px solid #0A5BD6;
+  border-bottom:none; border-radius:8px 8px 0 0;
+  display:none; z-index:9100;
+  box-shadow:3px -3px 14px rgba(0,0,0,.55);
+  overflow:hidden;
+}
+
+.sm-hdr {
+  background:linear-gradient(135deg,#1B68CC 0%,#4A90DB 40%,#1B68CC 100%);
+  padding:8px 12px; display:flex; align-items:center; gap:10px; height:56px;
+}
+.sm-avatar {
+  width:42px; height:42px;
+  background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);
+  border:2px solid #fff; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; flex-shrink:0;
+}
+.sm-uname {
+  color:#fff; font-size:14px; font-weight:bold;
+  text-shadow:1px 1px 3px rgba(0,0,0,.5);
+}
+
+.sm-body { display:flex; height:310px; }
+
+.sm-left {
+  flex:1; background:#fff;
+  border-right:1px solid #C5C5C5;
+  display:flex; flex-direction:column; overflow-y:auto;
+}
+.sm-right {
+  width:162px; background:#D3E5FA;
+  padding:4px 0; overflow-y:auto;
+}
+
+.sm-item {
+  padding:4px 10px; cursor:default;
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; white-space:nowrap;
+}
+.sm-item:hover { background:#316AC5; color:#fff; }
+.sm-item-ico { width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.sm-item-lbl { flex:1; font-size:12px; }
+.sm-item-arrow { font-size:9px; color:#666; }
+.sm-item:hover .sm-item-arrow { color:#ccc; }
+
+.sm-sep { height:1px; background:#D0D0D0; margin:3px 0; }
+
+.sm-all {
+  margin-top:auto; padding:5px 10px;
+  border-top:1px solid #D0D0D0;
+  cursor:default; display:flex; align-items:center; gap:8px;
+  font-size:12px; font-weight:bold;
+}
+.sm-all:hover { background:#316AC5; color:#fff; }
+.sm-all:hover .sm-item-arrow { color:#fff; }
+
+.sm-right-item {
+  padding:3px 10px; cursor:default;
+  display:flex; align-items:center; gap:7px;
+  font-size:12px; font-weight:bold; color:#003399;
+}
+.sm-right-item:hover { background:#316AC5; color:#fff; }
+.sm-right-sep { height:1px; background:rgba(0,0,0,.15); margin:3px 0; }
+.sm-right-item-ico { width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+
+.sm-footer {
+  background:linear-gradient(to bottom,#1356B0 0%,#0E44A0 100%);
+  height:34px; display:flex; align-items:center;
+  justify-content:flex-end; padding:0 10px; gap:8px;
+}
+.sm-foot-btn {
+  height:25px; padding:0 10px;
+  background:linear-gradient(to bottom,#4A88D4 0%,#2E6AB5 100%);
+  border:1px solid rgba(255,255,255,.3); border-radius:3px;
+  color:#fff; font-size:11px; font-family:Tahoma,sans-serif;
+  cursor:pointer; display:flex; align-items:center; gap:4px;
+}
+.sm-foot-btn:hover {
+  background:linear-gradient(to bottom,#5A98E4 0%,#3E7AC5 100%);
+}
+
+/* ── Context Menu ──────────────────────────────── */
+.xp-ctx {
+  position:fixed; background:#f6f6f6;
+  border:1px solid #999; box-shadow:2px 2px 7px rgba(0,0,0,.4);
+  display:none; z-index:9300; min-width:180px; padding:2px;
+}
+.ctx-item {
+  padding:3px 30px 3px 28px;
+  cursor:default; font-size:11px;
+  display:flex; align-items:center;
+  white-space:nowrap; position:relative;
+}
+.ctx-item:hover { background:#316AC5; color:#fff; }
+.ctx-item .ctx-ico { position:absolute; left:6px; font-size:14px; }
+.ctx-sep { height:1px; background:#D0D0D0; margin:2px 0; }
+
+/* ── Balloon Tip ───────────────────────────────── */
+#balloon {
+  position:fixed; right:12px; bottom:40px;
+  background:#FFFEE0; border:1px solid #0066CC;
+  border-radius:6px; padding:8px 28px 8px 10px;
+  max-width:240px; box-shadow:2px 2px 8px rgba(0,0,0,.3);
+  font-size:11px; z-index:9500; display:none;
+}
+.balloon-title {
+  font-weight:bold; color:#003399;
+  margin-bottom:3px; font-size:11px;
+  display:flex; align-items:center; gap:4px;
+}
+#balloon-close {
+  position:absolute; top:4px; right:7px;
+  cursor:pointer; font-size:14px; color:#666; line-height:1;
+}
+#balloon-close:hover { color:#CC0000; }
+/* balloon pointer */
+#balloon::after {
+  content:'';
+  position:absolute; bottom:-8px; right:18px;
+  border-left:7px solid transparent;
+  border-right:7px solid transparent;
+  border-top:8px solid #0066CC;
+}
+#balloon::before {
+  content:'';
+  position:absolute; bottom:-6px; right:19px;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top:7px solid #FFFEE0;
+  z-index:1;
+}
+
+/* ── Tooltip ───────────────────────────────────── */
+#tooltip {
+  position:fixed; background:#FFFBCC;
+  border:1px solid #000; padding:2px 5px;
+  font-size:11px; pointer-events:none;
+  display:none; z-index:9999;
+  box-shadow:1px 1px 3px rgba(0,0,0,.3);
+}
+
+/* ── Window Layout Helpers ─────────────────────── */
+.win-inner {
+  display:flex; flex-direction:column;
+  height:100%; position:relative;
+}
+.win-body-full { flex:1; overflow:hidden; display:flex; }
+
+/* resize grip (bottom-right) */
+.xpwin::after {
+  content:'';
+  position:absolute; bottom:2px; right:2px;
+  width:13px; height:13px;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0px, transparent 2px,
+      rgba(0,0,0,.15) 2px, rgba(0,0,0,.15) 3px
+    );
+  pointer-events:none;
+}
+
+/* resize handles */
+.rh-right { position:absolute; right:0; top:0; bottom:0; width:5px; cursor:e-resize; z-index:10; }
+.rh-bottom { position:absolute; left:0; right:0; bottom:0; height:5px; cursor:s-resize; z-index:10; }
+.rh-corner { position:absolute; right:0; bottom:0; width:14px; height:14px; cursor:se-resize; z-index:11; }
+
+/* ── About content ─────────────────────────────── */
+.about-header {
+  background:linear-gradient(to right,#E8F0FE 0%,#D0E4FC 100%);
+  border:1px solid #BAD0F0; padding:10px 12px;
+  margin-bottom:12px; border-radius:2px;
+  display:flex; align-items:center; gap:12px;
+}
+.about-avatar {
+  width:52px; height:52px;
+  background:linear-gradient(135deg,#4A9eff 0%,#1E5BB8 100%);
+  border-radius:4px; display:flex; align-items:center;
+  justify-content:center; font-size:30px; flex-shrink:0;
+  box-shadow:0 2px 6px rgba(0,0,0,.2);
+}
+.about-name { font-size:15px; font-weight:bold; color:#003399; }
+.about-title { font-size:12px; color:#555; margin-top:3px; }
+.about-status {
+  display:inline-block; margin-top:4px;
+  background:#E0FFE0; border:1px solid #80C080;
+  padding:1px 6px; font-size:10px; color:#006600; border-radius:2px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<svg id="cursor" viewBox="0 0 20 24">
+  <polygon points="2,2 2,18 6,14 9,20 11.5,19 8.5,13 15,13"
+    fill="white" stroke="black" stroke-width="1" stroke-linejoin="round"/>
+</svg>
+
+<!-- Desktop Background: Bliss SVG -->
+<div id="desktop-bg">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1280 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5FA8DC"/>
+      <stop offset="55%" stop-color="#9EC8E8"/>
+      <stop offset="100%" stop-color="#C0D9EE"/>
+    </linearGradient>
+    <linearGradient id="hills-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5BB81A"/>
+      <stop offset="100%" stop-color="#3E9010"/>
+    </linearGradient>
+    <linearGradient id="hill-main" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6DD11E"/>
+      <stop offset="100%" stop-color="#3E9010"/>
+    </linearGradient>
+    <linearGradient id="hill-left" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#56B814"/>
+      <stop offset="100%" stop-color="#3A8808"/>
+    </linearGradient>
+    <filter id="blur1"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="blur2"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <!-- Sky -->
+  <rect fill="url(#sky)" width="1280" height="800"/>
+  <!-- Clouds -->
+  <g opacity=".92">
+    <ellipse cx="250" cy="130" rx="90" ry="38" fill="white" filter="url(#blur1)"/>
+    <ellipse cx="310" cy="115" rx="70" ry="30" fill="white" filter="url(#blur1)"/>
+    <ellipse cx="190" cy="145" rx="60" ry="25" fill="white" filter="url(#blur1)"/>
+  </g>
+  <g opacity=".88">
+    <ellipse cx="800" cy="100" rx="110" ry="42" fill="white" filter="url(#blur1)"/>
+    <ellipse cx="870" cy="85" rx="80" ry="33" fill="white" filter="url(#blur1)"/>
+    <ellipse cx="730" cy="115" rx="70" ry="28" fill="white" filter="url(#blur1)"/>
+  </g>
+  <g opacity=".7">
+    <ellipse cx="1100" cy="140" rx="80" ry="32" fill="white" filter="url(#blur2)"/>
+    <ellipse cx="1160" cy="125" rx="60" ry="26" fill="white" filter="url(#blur2)"/>
+  </g>
+  <!-- Distant hills -->
+  <ellipse cx="200" cy="620" rx="500" ry="260" fill="#4EAA12" opacity=".6" filter="url(#blur2)"/>
+  <ellipse cx="1100" cy="650" rx="450" ry="230" fill="#4EAA12" opacity=".55" filter="url(#blur2)"/>
+  <!-- Background hills -->
+  <ellipse cx="640" cy="720" rx="900" ry="350" fill="url(#hills-bg)"/>
+  <!-- Main foreground hill (the iconic rolling mound) -->
+  <ellipse cx="620" cy="900" rx="820" ry="430" fill="url(#hill-main)"/>
+  <!-- Side hills -->
+  <ellipse cx="-80" cy="780" rx="480" ry="280" fill="url(#hill-left)"/>
+  <ellipse cx="1380" cy="790" rx="500" ry="290" fill="#50B015"/>
+  <!-- Ground floor -->
+  <rect x="0" y="720" width="1280" height="80" fill="#3E9010"/>
+</svg>
+</div>
+
+<!-- Desktop Icons -->
+<div id="desktop">
+  <div class="dicon" data-win="about" ondblclick="openWin('about')" onclick="selIcon(this)">
+    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="2" y="2" width="28" height="28" rx="3" fill="#4A9EFF"/><rect x="4" y="4" width="26" height="26" rx="2" fill="#6BB8FF"/><text x="16" y="21" text-anchor="middle" font-size="16" fill="white">👤</text></svg>
+    <div class="dicon-lbl">About Me</div>
+  </div>
+  <div class="dicon" data-win="skills" ondblclick="openWin('skills')" onclick="selIcon(this)">
+    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="2" fill="#6A6A6A"/><rect x="4" y="8" width="24" height="14" rx="1" fill="#00D0FF"/><rect x="10" y="22" width="12" height="4" fill="#8A8A8A"/><rect x="8" y="26" width="16" height="2" fill="#5A5A5A"/></svg>
+    <div class="dicon-lbl">Skills.txt</div>
+  </div>
+  <div class="dicon" data-win="projects" ondblclick="openWin('projects')" onclick="selIcon(this)">
+    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="1" y="8" width="30" height="20" rx="1" fill="#F0B340"/><rect x="1" y="12" width="30" height="16" rx="1" fill="#F5C842"/><path d="M1 12 L1 10 Q1 8 5 8 L14 8 L16 12 Z" fill="#E09A20"/></svg>
+    <div class="dicon-lbl">Projects</div>
+  </div>
+  <div class="dicon" data-win="contact" ondblclick="openWin('contact')" onclick="selIcon(this)">
+    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="2" fill="#ECE9D8" stroke="#888" stroke-width="1"/><path d="M2 8 L16 18 L30 8" fill="none" stroke="#888" stroke-width="1.5"/><rect x="3" y="8" width="12" height="8" rx="1" fill="#4A9EFF" opacity=".3"/></svg>
+    <div class="dicon-lbl">Contact</div>
+  </div>
+  <div class="dicon" data-win="resume" ondblclick="openWin('resume')" onclick="selIcon(this)">
+    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="5" y="1" width="19" height="26" rx="1" fill="white" stroke="#AAA" stroke-width="1"/><path d="M18 1 L24 7 L18 7 Z" fill="#CCC"/><line x1="8" y1="10" x2="22" y2="10" stroke="#AAA" stroke-width="1.2"/><line x1="8" y1="13" x2="22" y2="13" stroke="#AAA" stroke-width="1.2"/><line x1="8" y1="16" x2="18" y2="16" stroke="#AAA" stroke-width="1.2"/><rect x="3" y="18" width="20" height="12" rx="1" fill="#E03535" opacity=".9"/><text x="13" y="27" text-anchor="middle" font-size="8" font-weight="bold" fill="white">PDF</text></svg>
+    <div class="dicon-lbl">Resume.pdf</div>
+  </div>
+  <div class="dicon" onclick="selIcon(this)">
+    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="2" y="4" width="28" height="20" rx="2" fill="#DDD" stroke="#AAA" stroke-width="1"/><rect x="4" y="6" width="24" height="14" rx="1" fill="#222"/><ellipse cx="16" cy="27" rx="8" ry="2" fill="#CCC"/><rect x="10" y="24" width="12" height="3" fill="#DDD"/></svg>
+    <div class="dicon-lbl">My Computer</div>
+  </div>
+  <div class="dicon" onclick="selIcon(this)">
+    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="1" y="10" width="30" height="19" rx="1" fill="#F5C842"/><path d="M1 13 L1 11 Q1 9 5 9 L14 9 L16 13 Z" fill="#E09A20"/><rect x="3" y="15" width="6" height="8" rx="1" fill="white" opacity=".6"/><rect x="11" y="15" width="6" height="8" rx="1" fill="white" opacity=".6"/><rect x="19" y="15" width="6" height="8" rx="1" fill="white" opacity=".6"/></svg>
+    <div class="dicon-lbl">My Documents</div>
+  </div>
+  <div class="dicon" onclick="selIcon(this)">
+    <svg class="dicon-img" viewBox="0 0 32 32"><path d="M6 8 L26 8 L28 28 L4 28 Z" fill="#DDD" stroke="#AAA" stroke-width="1"/><path d="M8 8 L24 8 L22 4 L10 4 Z" fill="#CCC" stroke="#AAA" stroke-width="1"/><line x1="12" y1="14" x2="20" y2="14" stroke="#888" stroke-width="1.5"/><line x1="11" y1="18" x2="21" y2="18" stroke="#888" stroke-width="1.2"/></svg>
+    <div class="dicon-lbl">Recycle Bin</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     WINDOWS
+     ══════════════════════════════════════════════ -->
+
+<!-- About Me Window -->
+<div class="xpwin" id="win-about" style="left:80px;top:40px;width:530px;height:440px;">
+  <div class="win-inner">
+    <div class="win-tb" id="tb-about">
+      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect width="16" height="16" rx="2" fill="#4A9EFF"/><text x="8" y="12" text-anchor="middle" font-size="10" fill="white">👤</text></svg>
+      <span class="win-tb-title">About Me — Park Seongho</span>
+      <div class="win-btns">
+        <div class="wbtn wmin" data-win="about" data-action="min">&#x2013;</div>
+        <div class="wbtn wmax" data-win="about" data-action="max">&#x25A1;</div>
+        <div class="wbtn wclose" data-win="about" data-action="close">&#x2715;</div>
+      </div>
+    </div>
+    <div class="win-menu">
+      <span class="mitem">File</span><span class="mitem">Edit</span>
+      <span class="mitem">View</span><span class="mitem">Favorites</span>
+      <span class="mitem">Tools</span><span class="mitem">Help</span>
+    </div>
+    <div class="win-toolbar">
+      <button class="tbtn dis">◀ Back</button>
+      <button class="tbtn dis">Forward ▶</button>
+      <div class="tsep"></div>
+      <button class="tbtn">⬆ Up</button>
+      <div class="tsep"></div>
+      <button class="tbtn">🔍 Search</button>
+      <button class="tbtn">📁 Folders</button>
+    </div>
+    <div class="win-addr">
+      <span class="addr-lbl">Address</span>
+      <input class="addr-inp" value="C:\Documents and Settings\Park Seongho\Desktop\About Me" readonly>
+      <button class="addr-go">Go</button>
+    </div>
+    <div class="win-body-full">
+      <div class="win-sidebar">
+        <div class="sb-sec-hdr">File and Folder Tasks ▴</div>
+        <div class="sb-sec-body">
+          <div class="sb-link">✏️ Rename</div>
+          <div class="sb-link">📋 Copy</div>
+          <div class="sb-link">📧 E-mail</div>
+        </div>
+        <div class="sb-sec-hdr">Other Places ▴</div>
+        <div class="sb-sec-body">
+          <div class="sb-link">🖥️ My Computer</div>
+          <div class="sb-link">📁 My Documents</div>
+          <div class="sb-link">🌐 Network</div>
+        </div>
+        <div class="sb-sec-hdr">Details ▴</div>
+        <div class="sb-details">
+          <div class="sb-details-icon">👤</div>
+          <div class="sb-details-name">About Me</div>
+          <div class="sb-details-info">File Folder<br>Date: 2024</div>
+        </div>
+      </div>
+      <div class="win-content">
+        <div class="about-header">
+          <div class="about-avatar">👨‍💻</div>
+          <div>
+            <div class="about-name">Park Seongho (박성호)</div>
+            <div class="about-title">AI Security Engineer</div>
+            <div class="about-status">● Available for Work</div>
+          </div>
+        </div>
+        <div class="xp-h2">🎯 Profile</div>
+        <div class="infobox"><strong>Position:</strong> AI Security Engineer</div>
+        <div class="infobox"><strong>Specialization:</strong> AI Security · Machine Learning Security · Cybersecurity</div>
+        <div class="infobox"><strong>Focus:</strong> Securing AI/ML systems and developing robust security solutions</div>
+        <p style="margin-top:10px;color:#333;font-size:12px;line-height:1.6;">
+          Passionate about identifying and mitigating vulnerabilities in AI and machine
+          learning systems. Dedicated to advancing the field of AI security through research,
+          development, and implementation of cutting-edge security measures.
+        </p>
+      </div>
+    </div>
+    <div class="win-status">
+      <div class="status-pane">1 object(s)</div>
+      <div class="status-pane">🖥️ My Computer</div>
+    </div>
+  </div>
+  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
+</div>
+
+<!-- Skills Window -->
+<div class="xpwin" id="win-skills" style="left:130px;top:90px;width:590px;height:500px;">
+  <div class="win-inner">
+    <div class="win-tb" id="tb-skills">
+      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect width="16" height="16" rx="2" fill="#5577AA"/><text x="8" y="12" text-anchor="middle" font-size="9" fill="white">💻</text></svg>
+      <span class="win-tb-title">Skills.txt — Notepad</span>
+      <div class="win-btns">
+        <div class="wbtn wmin" data-win="skills" data-action="min">&#x2013;</div>
+        <div class="wbtn wmax" data-win="skills" data-action="max">&#x25A1;</div>
+        <div class="wbtn wclose" data-win="skills" data-action="close">&#x2715;</div>
+      </div>
+    </div>
+    <div class="win-menu">
+      <span class="mitem">File</span><span class="mitem">Edit</span>
+      <span class="mitem">Format</span><span class="mitem">View</span>
+      <span class="mitem">Help</span>
+    </div>
+    <div class="win-body-full" style="flex-direction:column;">
+      <div class="win-content" style="background:#fff;font-family:Consolas,'Courier New',monospace;font-size:12px;padding:8px 12px;">
+        <div class="xp-h2">💡 Core Competencies</div>
+        <div class="skill-grid">
+          <div class="skill-tag">🔒 AI/ML Security</div>
+          <div class="skill-tag">🛡️ Adversarial ML</div>
+          <div class="skill-tag">🔍 Penetration Testing</div>
+          <div class="skill-tag">⚠️ Vulnerability Analysis</div>
+          <div class="skill-tag">🌐 Network Security</div>
+          <div class="skill-tag">🏗️ Security Architecture</div>
+          <div class="skill-tag">🐍 Python / Security Tools</div>
+          <div class="skill-tag">🎯 Threat Modeling</div>
+          <div class="skill-tag">☁️ Cloud Security</div>
+          <div class="skill-tag">🐳 Container Security</div>
+          <div class="skill-tag">📊 Data Privacy</div>
+          <div class="skill-tag">🔐 Cryptography</div>
+        </div>
+        <div class="xp-h3">🎓 Expertise Areas</div>
+        <div class="infobox">Model Robustness &amp; Adversarial Attacks</div>
+        <div class="infobox">Data Poisoning Detection &amp; Prevention</div>
+        <div class="infobox">Secure ML Pipeline Development</div>
+        <div class="infobox">AI System Security Auditing</div>
+        <div class="infobox">Zero-day Vulnerability Research</div>
+      </div>
+    </div>
+    <div class="win-status">
+      <div class="status-pane">Ln 1, Col 1</div>
+      <div class="status-pane">100%</div>
+      <div class="status-pane">Windows (CRLF)</div>
+      <div class="status-pane">UTF-8</div>
+    </div>
+  </div>
+  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
+</div>
+
+<!-- Projects Window -->
+<div class="xpwin" id="win-projects" style="left:180px;top:130px;width:640px;height:540px;">
+  <div class="win-inner">
+    <div class="win-tb" id="tb-projects">
+      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect x="0" y="4" width="16" height="10" rx="1" fill="#F5C842"/><path d="M0 6 L0 5 Q0 4 3 4 L8 4 L9 6 Z" fill="#E09A20"/></svg>
+      <span class="win-tb-title">Projects — Windows Explorer</span>
+      <div class="win-btns">
+        <div class="wbtn wmin" data-win="projects" data-action="min">&#x2013;</div>
+        <div class="wbtn wmax" data-win="projects" data-action="max">&#x25A1;</div>
+        <div class="wbtn wclose" data-win="projects" data-action="close">&#x2715;</div>
+      </div>
+    </div>
+    <div class="win-menu">
+      <span class="mitem">File</span><span class="mitem">Edit</span>
+      <span class="mitem">View</span><span class="mitem">Favorites</span>
+      <span class="mitem">Tools</span><span class="mitem">Help</span>
+    </div>
+    <div class="win-toolbar">
+      <button class="tbtn dis">◀ Back</button>
+      <button class="tbtn dis">Forward ▶</button>
+      <div class="tsep"></div>
+      <button class="tbtn">⬆ Up</button>
+      <div class="tsep"></div>
+      <button class="tbtn">🔍 Search</button>
+      <button class="tbtn">📁 Folders</button>
+      <div class="tsep"></div>
+      <button class="tbtn">⠿ Views</button>
+    </div>
+    <div class="win-addr">
+      <span class="addr-lbl">Address</span>
+      <input class="addr-inp" value="C:\My Documents\Projects" readonly>
+      <button class="addr-go">Go</button>
+    </div>
+    <div class="win-body-full">
+      <div class="win-sidebar">
+        <div class="sb-sec-hdr">File and Folder Tasks ▴</div>
+        <div class="sb-sec-body">
+          <div class="sb-link">📁 New Folder</div>
+          <div class="sb-link">🌐 Share Folder</div>
+        </div>
+        <div class="sb-sec-hdr">Other Places ▴</div>
+        <div class="sb-sec-body">
+          <div class="sb-link">🖥️ My Computer</div>
+          <div class="sb-link">📁 My Documents</div>
+          <div class="sb-link">🗑️ Recycle Bin</div>
+        </div>
+        <div class="sb-sec-hdr">Details ▴</div>
+        <div class="sb-details">
+          <div class="sb-details-icon">📁</div>
+          <div class="sb-details-name">Projects</div>
+          <div class="sb-details-info">File Folder<br>4 items</div>
+        </div>
+      </div>
+      <div class="win-content">
+        <div class="xp-h2">🚀 Featured Work</div>
+        <div class="proj-card">
+          <div class="proj-card-title">🤖 AI Security Research</div>
+          <p>Research and development in adversarial machine learning, model robustness
+          testing, and defense mechanisms against AI attacks. Published findings on
+          novel attack vectors targeting large language models.</p>
+        </div>
+        <div class="proj-card">
+          <div class="proj-card-title">🔐 ML Security Framework</div>
+          <p>Development of comprehensive security frameworks for machine learning pipelines,
+          including data validation, model monitoring, and anomaly detection systems
+          deployed in production environments.</p>
+        </div>
+        <div class="proj-card">
+          <div class="proj-card-title">🛡️ Security Auditing Tools</div>
+          <p>Creation of automated tools for security assessment of AI/ML systems,
+          vulnerability scanning, and compliance checking across enterprise deployments.</p>
+        </div>
+        <div class="proj-card">
+          <div class="proj-card-title">☁️ Cloud Security Solutions</div>
+          <p>Implementation of security measures for cloud-based AI services, including
+          access control, encryption, and secure deployment strategies for AWS/GCP.</p>
+        </div>
+      </div>
+    </div>
+    <div class="win-status">
+      <div class="status-pane">4 object(s)</div>
+      <div class="status-pane">🖥️ My Computer</div>
+    </div>
+  </div>
+  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
+</div>
+
+<!-- Contact Window -->
+<div class="xpwin" id="win-contact" style="left:220px;top:170px;width:490px;height:390px;">
+  <div class="win-inner">
+    <div class="win-tb" id="tb-contact">
+      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1" fill="#ECE9D8" stroke="#888" stroke-width=".8"/><path d="M1 4 L8 9 L15 4" fill="none" stroke="#888" stroke-width="1"/></svg>
+      <span class="win-tb-title">Contact Information — Outlook Express</span>
+      <div class="win-btns">
+        <div class="wbtn wmin" data-win="contact" data-action="min">&#x2013;</div>
+        <div class="wbtn wmax" data-win="contact" data-action="max">&#x25A1;</div>
+        <div class="wbtn wclose" data-win="contact" data-action="close">&#x2715;</div>
+      </div>
+    </div>
+    <div class="win-menu">
+      <span class="mitem">File</span><span class="mitem">Edit</span>
+      <span class="mitem">View</span><span class="mitem">Tools</span>
+      <span class="mitem">Message</span><span class="mitem">Help</span>
+    </div>
+    <div class="win-toolbar">
+      <button class="tbtn">📨 New Mail</button>
+      <button class="tbtn">📬 Reply</button>
+      <div class="tsep"></div>
+      <button class="tbtn">📤 Send/Recv</button>
+      <div class="tsep"></div>
+      <button class="tbtn">📇 Addresses</button>
+    </div>
+    <div class="win-body-full">
+      <div class="win-content">
+        <div class="xp-h2">📬 Get In Touch</div>
+        <div class="infobox">
+          <strong>📧 Email:</strong>
+          <a href="mailto:psh243360@gmail.com" style="color:#0645AD;text-decoration:none;">psh243360@gmail.com</a>
+        </div>
+        <div class="infobox"><strong>💼 Status:</strong> Open to opportunities</div>
+        <div class="infobox"><strong>🌍 Location:</strong> South Korea · Remote Available</div>
+        <p style="margin-top:12px;color:#333;font-size:12px;line-height:1.6;">
+          Feel free to reach out for collaborations, consulting opportunities,
+          or to discuss AI security topics. I'm always interested in connecting
+          with fellow security professionals and researchers.
+        </p>
+        <div style="margin-top:14px;padding:10px;background:#F0F8E8;border:1px solid #90C060;border-radius:2px;">
+          <strong style="color:#006600;">✔ Currently Available:</strong>
+          <span style="color:#333;font-size:11px;"> Full-time · Part-time · Contract</span>
+        </div>
+      </div>
+    </div>
+    <div class="win-status">
+      <div class="status-pane">Inbox: 0 unread</div>
+      <div class="status-pane">🌐 Online</div>
+    </div>
+  </div>
+  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
+</div>
+
+<!-- Resume Window -->
+<div class="xpwin" id="win-resume" style="left:260px;top:200px;width:540px;height:460px;">
+  <div class="win-inner">
+    <div class="win-tb" id="tb-resume">
+      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect x="2" y="0" width="10" height="14" rx="1" fill="white" stroke="#AAA" stroke-width=".8"/><path d="M9 0 L12 3 L9 3 Z" fill="#CCC"/><rect x="1" y="9" width="11" height="7" rx="1" fill="#E03535"/><text x="6.5" y="15" text-anchor="middle" font-size="5" font-weight="bold" fill="white">PDF</text></svg>
+      <span class="win-tb-title">Resume.pdf — Adobe Reader</span>
+      <div class="win-btns">
+        <div class="wbtn wmin" data-win="resume" data-action="min">&#x2013;</div>
+        <div class="wbtn wmax" data-win="resume" data-action="max">&#x25A1;</div>
+        <div class="wbtn wclose" data-win="resume" data-action="close">&#x2715;</div>
+      </div>
+    </div>
+    <div class="win-menu">
+      <span class="mitem">File</span><span class="mitem">Edit</span>
+      <span class="mitem">View</span><span class="mitem">Document</span>
+      <span class="mitem">Tools</span><span class="mitem">Help</span>
+    </div>
+    <div class="win-toolbar">
+      <button class="tbtn dis">◀</button>
+      <button class="tbtn dis">▶</button>
+      <div class="tsep"></div>
+      <button class="tbtn">🔍 Find</button>
+      <button class="tbtn">🖨️ Print</button>
+      <div class="tsep"></div>
+      <select style="height:20px;font-size:11px;font-family:Tahoma,sans-serif;border:1px solid #7F9DB9;">
+        <option>100%</option><option>75%</option><option>125%</option>
+      </select>
+    </div>
+    <div class="win-body-full">
+      <div class="win-content" style="background:#808080;display:flex;justify-content:center;padding:16px;">
+        <!-- PDF page simulation -->
+        <div style="background:white;width:460px;min-height:580px;box-shadow:0 4px 12px rgba(0,0,0,.5);padding:28px 32px;font-family:Times New Roman,serif;">
+          <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:14px;">
+            <div style="font-size:20px;font-weight:bold;">Park Seongho</div>
+            <div style="font-size:12px;color:#444;margin-top:3px;">AI Security Engineer</div>
+            <div style="font-size:11px;color:#666;margin-top:2px;">psh243360@gmail.com</div>
+          </div>
+          <div style="font-size:13px;font-weight:bold;border-bottom:1px solid #888;margin-bottom:6px;">EDUCATION</div>
+          <div style="font-size:11px;margin-bottom:10px;">
+            <strong>Computer Science &amp; Security Engineering</strong><br>
+            <span style="color:#555;">Focus: AI Systems, Cybersecurity</span>
+          </div>
+          <div style="font-size:13px;font-weight:bold;border-bottom:1px solid #888;margin-bottom:6px;">CERTIFICATIONS</div>
+          <div style="font-size:11px;margin-bottom:10px;">
+            • AI/ML Security Specialist<br>
+            • Cybersecurity Professional<br>
+            • Cloud Security (AWS/GCP)
+          </div>
+          <div style="font-size:13px;font-weight:bold;border-bottom:1px solid #888;margin-bottom:6px;">SKILLS</div>
+          <div style="font-size:11px;margin-bottom:10px;">
+            Python · TensorFlow · PyTorch · Kubernetes<br>
+            Penetration Testing · SIEM · IDS/IPS<br>
+            Docker · AWS · GCP · Azure
+          </div>
+          <div style="font-size:13px;font-weight:bold;border-bottom:1px solid #888;margin-bottom:6px;">INTERESTS</div>
+          <div style="font-size:11px;">
+            AI Safety &amp; Ethics · Emerging Security Threats<br>
+            Open Source Security · CTF Competitions
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="win-status">
+      <div class="status-pane">Page 1 of 1</div>
+      <div class="status-pane">Resume.pdf</div>
+    </div>
+  </div>
+  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TASKBAR
+     ══════════════════════════════════════════════ -->
+<div id="taskbar">
+
+  <!-- Start Button -->
+  <button id="start-btn" onclick="toggleStart()">
+    <!-- Windows XP 4-color flag logo -->
+    <svg width="18" height="18" viewBox="0 0 20 20">
+      <path d="M0 2 L9 0 L9 9 L0 8 Z" fill="#E00000"/>
+      <path d="M10 0 L20 2 L20 8 L10 9 Z" fill="#00AB00"/>
+      <path d="M0 10 L9 10 L9 20 L0 18 Z" fill="#0000E0"/>
+      <path d="M10 10 L20 10 L20 18 L10 20 Z" fill="#E0E000"/>
+    </svg>
+    <span>start</span>
+  </button>
+
+  <!-- Quick Launch -->
+  <div id="ql">
+    <div class="ql-btn" title="Show Desktop">🖥️</div>
+    <div class="ql-btn" title="Internet Explorer">🌐</div>
+    <div class="ql-btn" title="Windows Media Player">🎵</div>
+  </div>
+
+  <!-- Window buttons -->
+  <div id="tb-btns"></div>
+
+  <!-- System Tray -->
+  <div id="systray">
+    <svg class="tray-ico" viewBox="0 0 16 16" title="Volume">
+      <path d="M2 5 L5 5 L9 2 L9 14 L5 11 L2 11 Z" fill="white" opacity=".8"/>
+      <path d="M11 5 Q14 8 11 11" fill="none" stroke="white" stroke-width="1.5" opacity=".8"/>
+    </svg>
+    <svg class="tray-ico" viewBox="0 0 16 16" title="Network">
+      <rect x="1" y="10" width="5" height="4" rx="1" fill="white" opacity=".9"/>
+      <rect x="10" y="10" width="5" height="4" rx="1" fill="white" opacity=".9"/>
+      <rect x="5" y="12" width="6" height="1.5" fill="white" opacity=".7"/>
+      <rect x="5" y="7" width="6" height="1.5" fill="white" opacity=".7"/>
+      <rect x="5" y="5" width="6" height="4" rx="1" fill="white" opacity=".5"/>
+    </svg>
+    <svg class="tray-ico" viewBox="0 0 16 16" title="Security Center">
+      <path d="M8 1 L14 4 L14 9 Q14 13 8 15 Q2 13 2 9 L2 4 Z" fill="#E03535" stroke="white" stroke-width=".8"/>
+      <path d="M5 8 L7 10 L11 6" fill="none" stroke="white" stroke-width="1.5"/>
+    </svg>
+    <div id="tray-clock">12:00 PM</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     START MENU
+     ══════════════════════════════════════════════ -->
+<div id="start-menu">
+  <div class="sm-hdr">
+    <div class="sm-avatar">👨‍💻</div>
+    <div class="sm-uname">Park Seongho</div>
+  </div>
+  <div class="sm-body">
+    <div class="sm-left">
+      <!-- Pinned -->
+      <div class="sm-item" onclick="openWin('about')">
+        <div class="sm-item-ico">👤</div>
+        <span class="sm-item-lbl">About Me</span>
+      </div>
+      <div class="sm-item" onclick="openWin('contact')">
+        <div class="sm-item-ico">📧</div>
+        <span class="sm-item-lbl">Contact</span>
+      </div>
+      <div class="sm-sep"></div>
+      <!-- Recent -->
+      <div class="sm-item" onclick="openWin('skills')">
+        <div class="sm-item-ico">💻</div>
+        <span class="sm-item-lbl">Technical Skills</span>
+      </div>
+      <div class="sm-item" onclick="openWin('projects')">
+        <div class="sm-item-ico">📁</div>
+        <span class="sm-item-lbl">Projects</span>
+      </div>
+      <div class="sm-item" onclick="openWin('resume')">
+        <div class="sm-item-ico">📄</div>
+        <span class="sm-item-lbl">Resume.pdf</span>
+      </div>
+      <div class="sm-all">
+        <div class="sm-item-ico">📋</div>
+        <span>All Programs</span>
+        <span class="sm-item-arrow">▶</span>
+      </div>
+    </div>
+    <div class="sm-right">
+      <div class="sm-right-item"><div class="sm-right-item-ico">🖥️</div>My Computer</div>
+      <div class="sm-right-item"><div class="sm-right-item-ico">📁</div>My Documents</div>
+      <div class="sm-right-item"><div class="sm-right-item-ico">🖼️</div>My Pictures</div>
+      <div class="sm-right-item"><div class="sm-right-item-ico">🎵</div>My Music</div>
+      <div class="sm-right-sep"></div>
+      <div class="sm-right-item"><div class="sm-right-item-ico">⚙️</div>Control Panel</div>
+      <div class="sm-right-item"><div class="sm-right-item-ico">🖨️</div>Printers</div>
+      <div class="sm-right-sep"></div>
+      <div class="sm-right-item"><div class="sm-right-item-ico">❓</div>Help and Support</div>
+      <div class="sm-right-item"><div class="sm-right-item-ico">🔍</div>Search</div>
+      <div class="sm-right-item"><div class="sm-right-item-ico">▶️</div>Run...</div>
+    </div>
+  </div>
+  <div class="sm-footer">
+    <button class="sm-foot-btn">🔒 Log Off</button>
+    <button class="sm-foot-btn">⏻ Turn Off Computer</button>
+  </div>
+</div>
+
+<!-- Desktop Context Menu -->
+<div class="xp-ctx" id="ctx-desktop">
+  <div class="ctx-item" onclick="arrangeIcons()"><span class="ctx-ico">📐</span>Arrange Icons By</div>
+  <div class="ctx-item"><span class="ctx-ico">🔄</span>Refresh</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item"><span class="ctx-ico">📋</span>Paste</div>
+  <div class="ctx-item"><span class="ctx-ico">📋</span>Paste Shortcut</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item"><span class="ctx-ico">🆕</span>New ▶</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item"><span class="ctx-ico">🎨</span>Properties</div>
+</div>
+
+<!-- Balloon Notification -->
+<div id="balloon">
+  <div class="balloon-title">⚠️ Security Center</div>
+  <div>Your computer might be at risk.<br>
+  <span style="color:#0645AD;cursor:pointer;" onclick="openWin('about')">Click here to learn more.</span></div>
+  <div id="balloon-close" onclick="document.getElementById('balloon').style.display='none'">✕</div>
+</div>
+
+<!-- Tooltip -->
+<div id="tooltip"></div>
+
+<!-- ══════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════ -->
+<script>
+/* ── Cursor ─────────────────────────────────────── */
+const cur = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top  = e.clientY + 'px';
+  window.parent.postMessage({ type:'mousemove', clientX:e.clientX, clientY:e.clientY }, '*');
+});
+
+/* ── Clock ──────────────────────────────────────── */
+function updateClock() {
+  const n = new Date();
+  const h = n.getHours() % 12 || 12;
+  const m = String(n.getMinutes()).padStart(2,'0');
+  const ap = n.getHours() >= 12 ? 'PM' : 'AM';
+  document.getElementById('tray-clock').innerHTML = `${h}:${m}<br>${ap}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ── Z-index manager ────────────────────────────── */
+let zTop = 200;
+let activeWin = null;
+let minimized = {};
+let maximized = {};
+let prevGeom = {};
+
+function getWin(id) { return document.getElementById('win-' + id); }
+
+function setActive(id) {
+  document.querySelectorAll('.xpwin').forEach(w => w.classList.remove('active'));
+  const w = getWin(id);
+  if (w) {
+    w.classList.add('active');
+    w.style.zIndex = ++zTop;
+    activeWin = id;
+  }
+  refreshTaskbar();
+}
+
+function openWin(id) {
+  const w = getWin(id);
+  if (!w) return;
+  minimized[id] = false;
+  if (w.style.display === 'none' || !w.style.display) {
+    w.style.display = 'block';
+  }
+  setActive(id);
+  // close start menu
+  document.getElementById('start-menu').style.display = 'none';
+  document.getElementById('start-btn').classList.remove('active');
+}
+
+function closeWin(id) {
+  const w = getWin(id);
+  if (!w) return;
+  w.style.display = 'none';
+  minimized[id] = false;
+  if (maximized[id]) maximized[id] = false;
+  if (activeWin === id) activeWin = null;
+  refreshTaskbar();
+}
+
+function minWin(id) {
+  const w = getWin(id);
+  if (!w) return;
+  minimized[id] = true;
+  w.style.display = 'none';
+  if (activeWin === id) activeWin = null;
+  refreshTaskbar();
+}
+
+function maxWin(id) {
+  const w = getWin(id);
+  if (!w) return;
+  if (maximized[id]) {
+    // restore
+    const g = prevGeom[id];
+    if (g) {
+      w.style.left   = g.left;
+      w.style.top    = g.top;
+      w.style.width  = g.width;
+      w.style.height = g.height;
+    }
+    w.classList.remove('maximized');
+    maximized[id] = false;
+  } else {
+    prevGeom[id] = { left:w.style.left, top:w.style.top, width:w.style.width, height:w.style.height };
+    w.style.left   = '0px';
+    w.style.top    = '0px';
+    w.style.width  = '100vw';
+    w.style.height = 'calc(100vh - 30px)';
+    w.classList.add('maximized');
+    maximized[id] = true;
+  }
+  setActive(id);
+}
+
+/* ── Taskbar buttons ────────────────────────────── */
+const WINS = {
+  about:    { label:'About Me',          icon:'👤' },
+  skills:   { label:'Skills.txt',        icon:'💻' },
+  projects: { label:'Projects',          icon:'📁' },
+  contact:  { label:'Contact',           icon:'✉️' },
+  resume:   { label:'Resume.pdf',        icon:'📄' },
+};
+
+function refreshTaskbar() {
+  const bar = document.getElementById('tb-btns');
+  bar.innerHTML = '';
+  document.querySelectorAll('.xpwin').forEach(w => {
+    const id = w.id.replace('win-','');
+    if (!WINS[id]) return;
+    const showing = w.style.display !== 'none';
+    const wasMin   = minimized[id];
+    if (!showing && !wasMin) return;
+    const btn = document.createElement('div');
+    btn.className = 'tb-winbtn' + (activeWin === id && !wasMin ? ' active' : '');
+    btn.innerHTML = `<span style="font-size:13px">${WINS[id].icon}</span><span class="tb-winbtn-txt">${WINS[id].label}</span>`;
+    btn.onclick = () => {
+      if (minimized[id]) {
+        minimized[id] = false;
+        const ww = getWin(id);
+        if (ww) ww.style.display = 'block';
+        setActive(id);
+      } else if (activeWin === id) {
+        minWin(id);
+      } else {
+        setActive(id);
+      }
+    };
+    bar.appendChild(btn);
+  });
+}
+
+/* ── Title bar buttons ──────────────────────────── */
+document.querySelectorAll('.wbtn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const id = btn.dataset.win;
+    const act = btn.dataset.action;
+    if (act === 'close')    closeWin(id);
+    else if (act === 'min') minWin(id);
+    else if (act === 'max') maxWin(id);
+  });
+});
+
+/* ── Click window to focus ──────────────────────── */
+document.querySelectorAll('.xpwin').forEach(w => {
+  w.addEventListener('mousedown', e => {
+    const id = w.id.replace('win-','');
+    setActive(id);
+  });
+  // Double-click title bar = maximize
+  const tb = w.querySelector('.win-tb');
+  if (tb) {
+    tb.addEventListener('dblclick', e => {
+      if (e.target.classList.contains('wbtn')) return;
+      const id = w.id.replace('win-','');
+      maxWin(id);
+    });
+  }
+});
+
+/* ── Drag windows ───────────────────────────────── */
+let drag = null, dragOff = {x:0,y:0};
+
+document.querySelectorAll('.win-tb').forEach(tb => {
+  tb.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('wbtn')) return;
+    const w = tb.closest('.xpwin');
+    if (w.classList.contains('maximized')) return;
+    drag = w;
+    const r = w.getBoundingClientRect();
+    dragOff.x = e.clientX - r.left;
+    dragOff.y = e.clientY - r.top;
+    e.preventDefault();
+  });
+});
+
+document.addEventListener('mousemove', e => {
+  if (!drag) return;
+  const x = Math.max(0, e.clientX - dragOff.x);
+  const y = Math.max(0, e.clientY - dragOff.y);
+  drag.style.left = x + 'px';
+  drag.style.top  = y + 'px';
+});
+
+document.addEventListener('mouseup', () => { drag = null; });
+
+/* ── Resize windows ─────────────────────────────── */
+let rsz = null, rszType = null, rszStart = {};
+
+document.querySelectorAll('.rh-right, .rh-bottom, .rh-corner').forEach(h => {
+  h.addEventListener('mousedown', e => {
+    e.stopPropagation();
+    rsz = h.closest('.xpwin');
+    rszType = h.classList.contains('rh-corner') ? 'corner'
+            : h.classList.contains('rh-right')  ? 'right' : 'bottom';
+    const r = rsz.getBoundingClientRect();
+    rszStart = { x:e.clientX, y:e.clientY, w:r.width, h:r.height };
+    e.preventDefault();
+  });
+});
+
+document.addEventListener('mousemove', e => {
+  if (!rsz) return;
+  const dx = e.clientX - rszStart.x;
+  const dy = e.clientY - rszStart.y;
+  if (rszType !== 'bottom') rsz.style.width  = Math.max(320, rszStart.w + dx) + 'px';
+  if (rszType !== 'right')  rsz.style.height = Math.max(200, rszStart.h + dy) + 'px';
+});
+
+document.addEventListener('mouseup', () => { rsz = null; });
+
+/* ── Desktop icon selection ─────────────────────── */
+function selIcon(el) {
+  document.querySelectorAll('.dicon').forEach(d => d.classList.remove('sel'));
+  el.classList.add('sel');
+}
+// Deselect on desktop click
+document.getElementById('desktop').addEventListener('click', e => {
+  if (!e.target.closest('.dicon')) {
+    document.querySelectorAll('.dicon').forEach(d => d.classList.remove('sel'));
+  }
+});
+
+/* ── Start Menu ─────────────────────────────────── */
+function toggleStart() {
+  const sm = document.getElementById('start-menu');
+  const sb = document.getElementById('start-btn');
+  const open = sm.style.display === 'block';
+  sm.style.display = open ? 'none' : 'block';
+  sb.classList.toggle('active', !open);
+}
+document.addEventListener('mousedown', e => {
+  const sm = document.getElementById('start-menu');
+  const sb = document.getElementById('start-btn');
+  if (!sb.contains(e.target) && !sm.contains(e.target)) {
+    sm.style.display = 'none';
+    sb.classList.remove('active');
+  }
+});
+// Start menu item clicks (close menu after)
+document.querySelectorAll('.sm-item[onclick], .sm-right-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.getElementById('start-menu').style.display = 'none';
+    document.getElementById('start-btn').classList.remove('active');
+  });
+});
+
+/* ── Context Menu ───────────────────────────────── */
+const ctxMenu = document.getElementById('ctx-desktop');
+document.getElementById('desktop').addEventListener('contextmenu', e => {
+  e.preventDefault();
+  ctxMenu.style.left    = e.clientX + 'px';
+  ctxMenu.style.top     = Math.min(e.clientY, window.innerHeight - 180) + 'px';
+  ctxMenu.style.display = 'block';
+});
+document.addEventListener('click', () => { ctxMenu.style.display = 'none'; });
+document.addEventListener('contextmenu', e => {
+  if (!e.target.closest('#desktop')) ctxMenu.style.display = 'none';
+});
+
+function arrangeIcons() { ctxMenu.style.display = 'none'; }
+
+/* ── Bubble events to parent ────────────────────── */
+['mousedown','mouseup'].forEach(t => {
+  document.addEventListener(t, e => {
+    window.parent.postMessage({ type:t, clientX:e.clientX, clientY:e.clientY }, '*');
+  });
+});
+['keydown','keyup'].forEach(t => {
+  document.addEventListener(t, e => {
+    window.parent.postMessage({ type:t, key:e.key }, '*');
+  });
+});
+
+/* ── Init ───────────────────────────────────────── */
+setTimeout(() => {
+  openWin('about');
+  refreshTaskbar();
+}, 400);
+
+// Balloon tip after 2.5s
+setTimeout(() => {
+  document.getElementById('balloon').style.display = 'block';
+  setTimeout(() => { document.getElementById('balloon').style.display = 'none'; }, 6000);
+}, 2500);
+
+</script>
+</body>
+</html>
