@@ -100,7 +100,6 @@ body {
   display: none;
   border: 0;
   background: #d5d2c5;
-  box-shadow: none;
   color: #1d1d1d;
   z-index: 900;
   cursor: default;
@@ -108,6 +107,15 @@ body {
 
 #viewer.open {
   display: block;
+}
+
+#viewer.windowed {
+  top: 18px;
+  left: 34px;
+  width: calc(100vw - 68px);
+  height: calc(100vh - 36px);
+  border: 1px solid #6e6e6e;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
 #viewer-titlebar {
@@ -127,6 +135,12 @@ body {
   white-space: nowrap;
 }
 
+#viewer-actions {
+  display: flex;
+  gap: 4px;
+}
+
+#viewer-toggle,
 #viewer-close {
   width: 18px;
   height: 18px;
@@ -146,6 +160,15 @@ body {
   font-family: "Times New Roman", serif;
 }
 
+#viewer-content::-webkit-scrollbar {
+  width: 12px;
+}
+
+#viewer-content::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+  border: 2px solid #e5e5e5;
+}
+
 #viewer-content.pdf-viewer {
   padding: 0;
   background: #bdb8a8;
@@ -156,15 +179,6 @@ body {
   height: 100%;
   border: 0;
   background: #8b8b8b;
-}
-
-#viewer-content::-webkit-scrollbar {
-  width: 12px;
-}
-
-#viewer-content::-webkit-scrollbar-thumb {
-  background: #b0b0b0;
-  border: 2px solid #e5e5e5;
 }
 
 .doc-shell {
@@ -221,7 +235,8 @@ body {
   font-size: 17px;
 }
 
-.doc-nav span {
+.doc-nav a {
+  color: inherit;
   text-decoration: underline;
 }
 
@@ -229,12 +244,6 @@ body {
   margin: 8px 0 14px;
   font-size: 22px;
   font-weight: 700;
-}
-
-.doc-list {
-  margin-left: 22px;
-  font-size: 16px;
-  line-height: 1.6;
 }
 
 .doc-card {
@@ -301,6 +310,53 @@ body {
   font-size: 15px;
   color: #555;
 }
+
+.doc-awards {
+  display: grid;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.doc-awards img {
+  width: 100%;
+  display: block;
+  border: 1px solid rgba(20, 20, 20, 0.22);
+}
+
+.contact-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(20, 20, 20, 0.35);
+  background: rgba(255, 255, 255, 0.72);
+  color: #111;
+  font: 15px "Times New Roman", serif;
+}
+
+.contact-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.contact-form button {
+  width: 180px;
+  padding: 9px 12px;
+  border: 1px solid rgba(20, 20, 20, 0.45);
+  background: #ece8da;
+  font: 700 14px Tahoma, sans-serif;
+}
+
+.contact-status {
+  min-height: 20px;
+  font-size: 14px;
+  color: #333;
+}
 </style>
 </head>
 <body>
@@ -318,7 +374,10 @@ body {
 <div id="viewer">
   <div id="viewer-titlebar">
     <div id="viewer-title">viewer</div>
-    <button id="viewer-close" type="button">X</button>
+    <div id="viewer-actions">
+      <button id="viewer-toggle" type="button">[]</button>
+      <button id="viewer-close" type="button">X</button>
+    </div>
   </div>
   <div id="viewer-content"></div>
 </div>
@@ -351,6 +410,7 @@ const viewer = document.getElementById("viewer");
 const viewerTitle = document.getElementById("viewer-title");
 const viewerContent = document.getElementById("viewer-content");
 const viewerClose = document.getElementById("viewer-close");
+const viewerToggle = document.getElementById("viewer-toggle");
 
 let buffer = "";
 let history = [];
@@ -375,48 +435,132 @@ const files = {
           <div>
             <div class="doc-brand">Park<br>Seongho<small>Portfolio '26</small></div>
             <div class="doc-nav">
-              <span>HOME</span>
-              <span>PROFILE</span>
-              <span>CONTACT</span>
-              <span>RESUME</span>
+              <a href="#about">ABOUT</a>
+              <a href="#experience">EXPERIENCE</a>
+              <a href="#projects">PROJECTS</a>
+              <a href="#contact">CONTACT</a>
+              <a href="#awards">AWARDS</a>
             </div>
           </div>
           <div>
             <div class="doc-title">Welcome</div>
             <div class="doc-subtitle">I'm Park Seongho</div>
             <div class="doc-copy">
-              I am focused on AI security and product-oriented security engineering. My work centers on LLM application
-              security, adversarial machine learning, and building systems that are clear to review and practical to operate.
+              I am an aspiring LLM engineer with a strong focus on AI security, privacy detection, and real-world AI system development.
             </div>
             <div class="doc-copy">
-              Thank you for taking the time to look through this portfolio. I wanted the experience to feel like opening a
-              workstation, moving through folders, and reading documents directly rather than clicking through generic cards.
-              If you would like to contact me, open the <span class="doc-link">contact</span> folder, or view the original
-              resume file in the <span class="doc-link">resume</span> folder.
+              As a senior majoring in Artificial Intelligence Cybersecurity at Korea University, I have built hands-on
+              experience across the full AI lifecycle, including data collection, preprocessing, model training, evaluation,
+              deployment, frontend implementation, and technical leadership.
             </div>
             <div class="doc-divider"></div>
             <div class="doc-banner">
               <div class="doc-banner-icon">+</div>
               <div>
                 <div class="doc-section-title" style="margin:0;">Looking for my resume?</div>
-                <div class="doc-meta">Open <strong>resume\\resume.pdf</strong> with <strong>cat</strong> to view the full file.</div>
+                <div class="doc-meta"><a href="#" class="doc-link" data-open-file="resume\\resume.pdf">Click here to open it</a></div>
               </div>
             </div>
             <div class="doc-divider"></div>
-            <div class="doc-section-title">About Me</div>
+            <div class="doc-section-title" id="about">About</div>
             <div class="doc-kv">
-              <div><strong>Role</strong> AI Security Engineer</div>
-              <div><strong>Focus</strong> LLM Security, Adversarial ML, Product Security</div>
-              <div><strong>Location</strong> Seoul, South Korea</div>
-              <div><strong>Style</strong> Terminal-first, implementation-oriented, review-driven</div>
+              <div><strong>Name</strong> Park SungHo</div>
+              <div><strong>Role</strong> Aspiring LLM Engineer / AI Security Engineer</div>
+              <div><strong>Focus</strong> AI Security, Privacy Detection, LLM Applications</div>
+              <div><strong>Location</strong> South Korea, Seoul</div>
+              <div><strong>Email</strong> psh243360@gmail.com</div>
             </div>
             <div class="doc-copy">
-              My interest in security comes from wanting to understand how systems actually fail in practice. That led me
-              toward AI security, where model behavior, application logic, and product constraints all interact. I enjoy
-              work that sits between research and implementation: reviewing attack surfaces, testing assumptions, and
-              turning findings into something a team can maintain.
+              I am particularly interested in solving security-domain problems with LLMs, such as personal information detection,
+              document security classification, and trustworthy AI systems. I enjoy leading projects, taking ownership of
+              implementation, and turning complex ideas into practical AI services.
             </div>
-            <img class="doc-image" src="/images/preview-image.jpg" alt="Park Seongho profile image">
+            <img class="doc-image" src="/profile/profile-photo.jpg" alt="Park Seongho profile image">
+            <div class="doc-divider"></div>
+            <div class="doc-section-title" id="experience">Experience</div>
+            <div class="doc-card">
+              <div class="doc-project-title" style="font-size:24px;">MarkAny Inc.</div>
+              <div class="doc-project-sub">AI Security Intern | Jan 2026 - Feb 2026</div>
+              <div class="doc-copy">
+                Joined MarkAny as a scouted intern and worked on AI security-related projects. Conducted a proof-of-concept
+                for automatic document security classification based on National Intelligence Service CSO criteria.
+              </div>
+              <div class="doc-copy">
+                Built and validated a document classification pipeline for internal documents across Confidential, Sensitive,
+                and Public security levels. Applied LLM-based data augmentation, fine-tuning, and evaluation strategies to
+                improve classification performance in a security-domain setting.
+              </div>
+            </div>
+            <div class="doc-divider"></div>
+            <div class="doc-section-title" id="projects">Projects</div>
+            <div class="doc-card">
+              <div class="doc-project-title" style="font-size:24px;">Korean Privacy Detection System</div>
+              <div class="doc-project-sub">Tech Lead / AI Engineer / Frontend Developer | Jul 2025 - Nov 2025</div>
+              <div class="doc-copy">
+                Led the development of a Korean privacy detection system and took ownership of both AI modeling and frontend
+                implementation. Built the full AI pipeline from data collection and preprocessing to model training and
+                Hugging Face deployment.
+              </div>
+              <div class="doc-copy">
+                Achieved 93% F1 on regex-hard entities and maintained less than 1%p gap between overall F1 and regex-hard F1.
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="doc-project-title" style="font-size:24px;">SBOM AI Agent</div>
+              <div class="doc-project-sub">Team Lead | Sep 2025 - Nov 2025</div>
+              <div class="doc-copy">
+                Led the overall development of an SBOM-based AI agent project. Directed team meetings, coordinated project
+                progress, and designed the project workflow and architecture.
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="doc-project-title" style="font-size:24px;">Document Security Classification POC</div>
+              <div class="doc-project-sub">AI Security Intern / AI Engineer, MarkAny Inc. | Jan 2026 - Feb 2026</div>
+              <div class="doc-copy">
+                Built a deep learning-based classification model to categorize internal documents into Confidential, Sensitive,
+                and Public levels. Achieved 96% accuracy and 97% average F1-score on evaluation data.
+              </div>
+            </div>
+            <div class="doc-divider"></div>
+            <div class="doc-section-title" id="contact">Contact</div>
+            <div class="doc-copy">
+              You can contact me directly by email or use the built-in form below.
+            </div>
+            <div class="doc-kv">
+              <div><strong>Email</strong> psh243360@gmail.com</div>
+              <div><strong>GitHub</strong> https://github.com/Creatine-mono</div>
+            </div>
+            <form class="contact-form" id="contact-form">
+              <input type="text" name="name" placeholder="Your name" required>
+              <input type="text" name="company" placeholder="Company / Team">
+              <input type="email" name="email" placeholder="Your email" required>
+              <textarea name="message" placeholder="Message" required></textarea>
+              <button type="submit">Send Message</button>
+              <div class="contact-status" id="contact-status"></div>
+            </form>
+            <div class="doc-divider"></div>
+            <div class="doc-section-title">Technical Skills</div>
+            <div class="doc-copy">
+              Languages: Python, SQL, TypeScript, JavaScript<br>
+              AI / Machine Learning: PyTorch, TensorFlow, Keras, scikit-learn, Pandas, NumPy<br>
+              LLM / NLP: Transformers, Hugging Face, LangChain, LoRA, QLoRA, PEFT, Unsloth, Prompt Engineering, RAG<br>
+              Backend / AI Serving: FastAPI, REST API, Model Fine-tuning, Inference Pipeline Design<br>
+              Frontend: React, TypeScript, Three.js, Dashboard Development, Data Visualization
+            </div>
+            <div class="doc-divider"></div>
+            <div class="doc-section-title" id="awards">Awards</div>
+            <div class="doc-awards">
+              <div class="doc-card">
+                <div class="doc-project-title" style="font-size:22px;">3rd KISIA Information Security Developer Hackathon</div>
+                <div class="doc-project-sub">Excellence Award</div>
+                <img src="/profile/awards/KakaoTalk_20260311_233842735.png" alt="Award image 1">
+              </div>
+              <div class="doc-card">
+                <div class="doc-project-title" style="font-size:22px;">KISIA AI Security Privacy Track Project</div>
+                <div class="doc-project-sub">Best Team Award</div>
+                <img src="/profile/awards/KakaoTalk_20260311_233842735_01.jpg" alt="Award image 2">
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -429,17 +573,9 @@ const files = {
       <div class="doc-shell">
         <div class="doc-title" style="font-size:40px;">Contact</div>
         <div class="doc-divider"></div>
-        <div class="doc-copy">
-          If you want to discuss AI security, product hardening, or portfolio work, the fastest route is email.
-        </div>
-        <div class="doc-card">
-          <div class="doc-kv">
-            <div><strong>Email</strong> psh243360@gmail.com</div>
-            <div><strong>GitHub</strong> github.com/Park-Seongho</div>
-            <div><strong>LinkedIn</strong> linkedin.com/in/parkseongho</div>
-            <div><strong>Location</strong> Seoul, South Korea</div>
-          </div>
-        </div>
+        <div class="doc-copy">Email: psh243360@gmail.com</div>
+        <div class="doc-copy">GitHub: https://github.com/Creatine-mono</div>
+        <div class="doc-copy">Location: South Korea, Seoul</div>
       </div>
     `
   },
@@ -450,9 +586,7 @@ const files = {
       <div class="doc-shell">
         <div class="doc-title" style="font-size:40px;">Resume</div>
         <div class="doc-divider"></div>
-        <div class="doc-copy">AI Security Engineer based in Seoul.</div>
-        <div class="doc-copy">Focus on LLM security, adversarial ML, and practical product defense.</div>
-        <div class="doc-copy">For the original resume file, run <strong>cat resume.pdf</strong>.</div>
+        <div class="doc-copy">Open the original PDF resume with <strong>cat resume.pdf</strong>.</div>
       </div>
     `
   },
@@ -477,7 +611,6 @@ function promptText() {
 
 function ensurePrompt() {
   if (activePromptLine) return;
-
   activePromptLine = document.createElement("div");
   activePromptLine.className = "prompt-line";
 
@@ -529,11 +662,11 @@ function resolvePath(input) {
 
   let working;
   if (/^[a-zA-Z]:\\/.test(target)) {
-    working = normalizePath(target);
+    working = target;
   } else if (target === "\\") {
     working = "C:\\";
   } else if (target.startsWith("\\")) {
-    working = "C:" + normalizePath(target);
+    working = "C:" + target;
   } else {
     working = currentPath + "\\" + target;
   }
@@ -563,6 +696,7 @@ function getEntry(path) {
 function openViewer(entryPath, entry) {
   viewerTitle.textContent = entryPath;
   viewerContent.classList.remove("pdf-viewer");
+  viewer.classList.remove("windowed");
 
   if (entry.type === "pdf") {
     viewerContent.classList.add("pdf-viewer");
@@ -576,6 +710,10 @@ function openViewer(entryPath, entry) {
 
 viewerClose.addEventListener("click", () => {
   viewer.classList.remove("open");
+});
+
+viewerToggle.addEventListener("click", () => {
+  viewer.classList.toggle("windowed");
 });
 
 const commands = {
@@ -653,6 +791,39 @@ function runCommand(raw) {
   ensurePrompt();
   updatePrompt();
 }
+
+viewerContent.addEventListener("click", (event) => {
+  const trigger = event.target.closest("[data-open-file]");
+  if (!trigger) return;
+  event.preventDefault();
+  const targetPath = resolvePath(trigger.getAttribute("data-open-file"));
+  const entry = getEntry(targetPath);
+  if (entry) openViewer(targetPath, entry);
+});
+
+viewerContent.addEventListener("submit", async (event) => {
+  if (event.target.id !== "contact-form") return;
+  event.preventDefault();
+
+  const form = event.target;
+  const status = viewerContent.querySelector("#contact-status");
+  const payload = Object.fromEntries(new FormData(form).entries());
+  status.textContent = "Sending...";
+
+  try {
+    const response = await fetch("/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error("send failed");
+    status.textContent = "Message sent successfully.";
+    form.reset();
+  } catch (error) {
+    status.textContent = "Failed to send message.";
+  }
+});
 
 addLine("Microsoft Windows [Version 10.0.19045.6466]");
 addLine("(c) Microsoft Corporation. All rights reserved.");
