@@ -3,1513 +3,421 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1024">
-<title>Windows XP</title>
+<title>AI-SEC Terminal</title>
 <style>
-/* ================================================
-   Windows XP Luna Theme — Authentic Recreation
-   ================================================ */
+:root {
+  --green:       #33ff33;
+  --green-dim:   #1a8f1a;
+  --green-dark:  #0d4d0d;
+  --green-glow:  #00ff41;
+  --cyan:        #00ffcc;
+  --cyan-dim:    #00aa88;
+  --yellow:      #ffcc00;
+  --orange:      #ff8800;
+  --red:         #ff4444;
+  --blue:        #4488ff;
+  --purple:      #aa44ff;
+  --bg:          #050905;
+  --bg2:         #070c07;
+  --bg3:         #060a10;
+  --border:      #144414;
+  --border2:     #0d2a1a;
+  --text:        #22cc22;
+  --text-dim:    #157015;
+}
 
-* { margin:0; padding:0; box-sizing:border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
 
 body {
-  font-family: Tahoma, 'MS Sans Serif', Arial, sans-serif;
-  font-size: 11px;
+  background: var(--bg);
+  color: var(--green);
+  font-family: 'Courier New', Consolas, 'Lucida Console', monospace;
+  font-size: 12px;
+  line-height: 1.5;
   overflow: hidden;
   width: 100vw;
   height: 100vh;
   cursor: none;
   user-select: none;
-  background: #000;
 }
 
-/* ── Custom Cursor ─────────────────────────────── */
-#cursor {
-  position: fixed;
-  width: 20px;
-  height: 24px;
-  pointer-events: none;
-  z-index: 99999;
-  top: 0; left: 0;
-  filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
-}
-
-/* ── Desktop Background (Bliss) ────────────────── */
-#desktop-bg {
-  position: fixed;
-  inset: 0 0 30px 0;
-  overflow: hidden;
-}
-
-/* ── Desktop Icon Area ─────────────────────────── */
-#desktop {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  bottom: 30px;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  padding: 8px 4px;
-  gap: 2px;
-}
-
-.dicon {
-  width: 78px;
-  min-height: 74px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5px 3px 4px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  text-align: center;
-  gap: 3px;
-  border-radius: 1px;
-}
-.dicon:hover  { background: rgba(49,106,197,.35); border-color: rgba(49,106,197,.7); }
-.dicon.sel    { background: rgba(49,106,197,.55); border-color: rgba(49,106,197,.9); }
-
-.dicon-img { width:32px; height:32px; flex-shrink:0; }
-
-.dicon-lbl {
-  color: #fff;
-  font-size: 11px;
-  line-height: 1.2;
-  text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
-  word-break: break-word;
-  max-width: 74px;
-  padding: 1px 2px;
-}
-.dicon.sel .dicon-lbl { background:#316AC5; color:#fff; text-shadow:none; }
-
-/* ── XP Window ─────────────────────────────────── */
-.xpwin {
-  position: absolute;
-  display: none;
-  min-width: 320px;
-  min-height: 200px;
-  /* Outer blue frame border */
-  border: 3px solid #84ADCE;
-  border-radius: 8px 8px 4px 4px;
-  box-shadow: 3px 3px 14px rgba(0,0,0,.55);
-  overflow: hidden;
-  background: #ECE9D8;
-}
-.xpwin.active {
-  z-index: 200;
-  border-color: #6BA3C8;
-}
-.xpwin.maximized {
-  border-radius: 0 !important;
-  border: none !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: calc(100vh - 30px) !important;
-}
-
-/* Title Bar */
-.win-tb {
-  height: 28px;
-  display: flex;
-  align-items: center;
-  padding: 0 4px 0 4px;
-  cursor: move;
-  position: relative;
-  border-bottom: 1px solid #003699;
-}
-/* Active Luna blue gradient */
-.xpwin.active .win-tb {
-  background: linear-gradient(to bottom,
-    #2A8FE8 0%, #1472D4 3%, #0A58C5 7%,
-    #0855C2 50%, #0040A8 51%, #003299 100%);
-}
-/* Inactive muted blue-gray */
-.xpwin:not(.active) .win-tb {
-  background: linear-gradient(to bottom,
-    #8FA8CC 0%, #7B96BE 4%, #6E88B3 50%,
-    #607AAA 51%, #4D6898 100%);
-  border-bottom-color: #4D6898;
-}
-/* Subtle highlight stripe */
-.win-tb::after {
+/* CRT scanlines */
+body::after {
   content:'';
-  position:absolute;
-  top:1px; left:8px; right:8px; height:1px;
-  background: rgba(255,255,255,.4);
+  position:fixed;inset:0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,transparent 2px,
+    rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 3px
+  );
   pointer-events:none;
+  z-index:9990;
+}
+/* Vignette */
+body::before {
+  content:'';
+  position:fixed;inset:0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+  pointer-events:none;
+  z-index:9989;
 }
 
-.win-tb-icon { width:16px; height:16px; margin-right:3px; flex-shrink:0; }
-
-.win-tb-title {
-  flex:1;
-  color:#fff;
-  font-size: 12px;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0,0,0,.6);
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-.xpwin:not(.active) .win-tb-title { text-shadow: 1px 1px 2px rgba(0,0,0,.3); }
-
-/* Title bar buttons */
-.win-btns { display:flex; gap:2px; align-items:center; }
-
-.wbtn {
-  width: 21px; height: 21px;
-  border-radius: 3px;
-  border: 1px solid rgba(0,0,0,.4);
-  cursor: pointer;
-  font-size: 11px; font-weight: bold;
-  display: flex; align-items:center; justify-content:center;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
-  position: relative;
-  font-family: Tahoma, sans-serif;
-  color: #000;
-}
-.wbtn.wmin, .wbtn.wmax {
-  background: linear-gradient(to bottom, #F0D44A 0%, #E5B828 55%, #D4A820 55%, #C99A18 100%);
-}
-.wbtn.wclose {
-  background: linear-gradient(to bottom, #FA9898 0%, #E03535 55%, #C82020 55%, #B81A1A 100%);
-  color: #fff;
-  border-color: rgba(100,0,0,.5);
-}
-.wbtn:hover { filter: brightness(1.15); }
-.wbtn:active { filter: brightness(.85); box-shadow: inset 0 1px 3px rgba(0,0,0,.4); }
-
-/* Menu Bar */
-.win-menu {
-  height: 21px;
-  background: #ECE9D8;
-  display: flex;
-  align-items: stretch;
-  border-bottom: 1px solid #ACA899;
-  padding: 0 2px;
-  flex-shrink: 0;
-}
-.mitem {
-  padding: 0 7px;
-  display: flex; align-items: center;
-  font-size: 11px; cursor: default;
-  color: #000; height: 100%;
-  white-space: nowrap;
-}
-.mitem:hover { background:#316AC5; color:#fff; }
-.mitem.disabled { color:#A0A0A0; }
-.mitem.disabled:hover { background:transparent; color:#A0A0A0; }
-
-/* Toolbar */
-.win-toolbar {
-  height: 26px;
-  background: #ECE9D8;
-  display: flex; align-items: center;
-  padding: 2px 3px;
-  border-bottom: 1px solid #ACA899;
-  gap: 1px; flex-shrink: 0;
-}
-.tbtn {
-  height: 22px; min-width: 24px;
-  padding: 0 6px;
-  background: transparent;
-  border: 1px solid transparent; border-radius: 2px;
-  cursor: pointer; font-size: 11px;
-  display: flex; align-items:center; gap:3px;
-  font-family: Tahoma, sans-serif; color: #000;
-  white-space: nowrap;
-}
-.tbtn:hover { background:linear-gradient(to bottom,#EEF5FF 0%,#D0E4FF 100%); border-color:#97BBDF; }
-.tbtn:active { background:linear-gradient(to bottom,#D0E4FF 0%,#C0D9FF 100%); }
-.tbtn:disabled, .tbtn.dis { opacity:.4; cursor:default; }
-.tbtn.dis:hover { background:transparent; border-color:transparent; }
-.tsep { width:1px; height:18px; background:#ACA899; margin:0 3px; }
-
-/* Address Bar */
-.win-addr {
-  height: 24px;
-  background: #ECE9D8;
-  display: flex; align-items: center;
-  padding: 2px 4px; gap: 4px;
-  border-bottom: 1px solid #ACA899;
-  flex-shrink: 0;
-}
-.addr-lbl { font-size:11px; white-space:nowrap; }
-.addr-inp {
-  flex:1; height:19px;
-  border: 1px solid #7F9DB9;
-  padding: 0 4px;
-  font-family: Tahoma, sans-serif; font-size: 11px;
-  background: #fff; outline: none; border-radius: 0;
-}
-.addr-go {
-  height:19px; padding:0 6px;
-  background: linear-gradient(to bottom,#ECE9D8 0%,#D4D0C8 100%);
-  border: 1px solid #7F9DB9;
-  font-family: Tahoma, sans-serif; font-size: 11px;
-  cursor: pointer;
+/* ── Cursor ─────────────────────────────────── */
+#cursor {
+  position:fixed;width:18px;height:18px;pointer-events:none;
+  z-index:99999;top:0;left:0;
+  filter: drop-shadow(0 0 4px var(--green-glow));
 }
 
-/* Window Body */
-.win-body {
-  display: flex;
-  overflow: hidden;
-  flex: 1;
+/* ── Boot Screen ────────────────────────────── */
+#boot {
+  position:fixed;inset:0;background:#000;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  padding:40px 60px;z-index:9800;
+  font-family:'Courier New',monospace;font-size:13px;
+  color:#22cc22;
+  transition: opacity 0.8s;
 }
+#boot-text { white-space:pre;line-height:1.8; }
+.boot-ok   { color:#33ff33; }
+.boot-warn { color:#ffcc00; }
+.boot-err  { color:#ff4444; }
 
-.win-sidebar {
-  width: 160px;
-  background: #EEF3FB;
-  border-right: 1px solid #C4D5EA;
-  overflow-y: auto;
-  flex-shrink: 0;
-}
-
-.sb-sec-hdr {
-  background: linear-gradient(to right,#2B6EBF 0%,#5099D8 70%,#7EBDEE 100%);
-  color: #fff; font-size: 11px; font-weight: bold;
-  padding: 4px 8px; cursor: pointer;
-  display: flex; justify-content:space-between; align-items:center;
-}
-.sb-sec-body { padding: 4px 0; }
-.sb-link {
-  padding: 2px 6px 2px 18px;
-  font-size: 11px; color: #0645AD;
-  cursor: pointer; display: flex; align-items:center; gap:4px;
-}
-.sb-link:hover { text-decoration: underline; }
-.sb-details { padding:8px; }
-.sb-details-icon { font-size:28px; text-align:center; margin-bottom:4px; }
-.sb-details-name { font-size:11px; font-weight:bold; margin-bottom:2px; }
-.sb-details-info { font-size:10px; color:#555; }
-
-.win-content {
-  flex:1; overflow-y:auto; overflow-x:auto;
-  padding: 12px; font-size: 12px; line-height: 1.5;
-  background: #fff;
-}
-
-/* XP scrollbar */
-.win-content::-webkit-scrollbar,
-.win-sidebar::-webkit-scrollbar { width:17px; }
-.win-content::-webkit-scrollbar-track,
-.win-sidebar::-webkit-scrollbar-track {
-  background: #F0EFE4; border-left:1px solid #9FB4C8;
-}
-.win-content::-webkit-scrollbar-button,
-.win-sidebar::-webkit-scrollbar-button {
-  background: linear-gradient(to bottom,#ECE9D8 0%,#C0BDB5 100%);
-  height:17px; border:1px solid #9FB4C8;
-  display:block;
-}
-.win-content::-webkit-scrollbar-thumb,
-.win-sidebar::-webkit-scrollbar-thumb {
-  background: linear-gradient(to right,
-    #C0D5EE 0%,#7BB0D8 30%,#5A99CC 50%,#7BB0D8 70%,#C0D5EE 100%);
-  border:1px solid #7FA8CC;
-}
-.win-content::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to right,
-    #AACBE8 0%,#6AA0C8 30%,#4A89BC 50%,#6AA0C8 70%,#AACBE8 100%);
-}
-
-/* Status Bar */
-.win-status {
-  height: 20px;
-  background: #ECE9D8;
-  border-top: 1px solid #ACA899;
-  display: flex; align-items:center;
-  flex-shrink: 0;
-}
-.status-pane {
-  padding: 0 8px; font-size:11px;
-  border-right: 1px solid #ACA899; height:100%;
-  display:flex; align-items:center; gap:3px;
-}
-.status-pane:last-child { border-right:none; }
-
-/* ── Content Styles ────────────────────────────── */
-.xp-h2 {
-  font-size:14px; font-weight:bold; color:#003399;
-  border-bottom:2px solid #3169C6;
-  padding-bottom:5px; margin-bottom:10px;
-  display:flex; align-items:center; gap:6px;
-}
-.xp-h3 { font-size:12px; font-weight:bold; color:#003399; margin:12px 0 6px; }
-.infobox {
-  background:#F7F9FE; border:1px solid #C9D8F0;
-  border-left:3px solid #3169C6;
-  padding:5px 9px; margin:5px 0;
-  border-radius:0 2px 2px 0;
-}
-.infobox strong { color:#003399; }
-
-.skill-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:8px 0; }
-.skill-tag {
-  background:linear-gradient(to bottom,#F5F5F5 0%,#E8E8E8 100%);
-  border:1px solid #C0C0C0; padding:4px 8px;
-  font-size:11px; border-radius:1px;
-  box-shadow:0 1px 2px rgba(0,0,0,.1);
-  display:flex; align-items:center; gap:5px;
-}
-
-.proj-card {
-  background:linear-gradient(to bottom,#fff 0%,#F8F8F8 100%);
-  border:1px solid #D0D0D0; padding:8px 10px;
-  margin:8px 0; box-shadow:0 1px 3px rgba(0,0,0,.1);
-}
-.proj-card-title { font-weight:bold; color:#003399; font-size:12px; margin-bottom:4px; }
-.proj-card p { color:#333; font-size:11px; line-height:1.5; }
-
-/* ── Taskbar ───────────────────────────────────── */
-#taskbar {
-  position: fixed;
-  bottom:0; left:0; right:0; height:30px;
-  background: linear-gradient(to bottom,
-    #2B5FAF 0%, #2258B8 4%, #1B4DB0 50%,
-    #153EA0 51%, #102F96 100%);
-  border-top: 2px solid #2B6BC8;
-  display:flex; align-items:center;
-  z-index: 9000;
-  box-shadow: 0 -1px 4px rgba(0,0,0,.4);
-}
-
-/* Start Button */
-#start-btn {
-  height: 100%;
-  padding: 0 10px 0 5px;
-  background: linear-gradient(to bottom,
-    #6CBD2A 0%, #5AB022 30%,
-    #338012 50%, #2D7912 51%, #226A08 100%);
-  border: none;
-  border-right: 1px solid #1A5E06;
-  cursor: pointer;
-  display: flex; align-items:center; gap:5px;
-  color: #fff; font-weight: bold;
-  font-size: 14px; font-style: italic;
-  font-family: Tahoma, sans-serif;
-  text-shadow: 1px 1px 3px rgba(0,0,0,.5);
-  border-radius: 0 8px 8px 0;
-  flex-shrink: 0;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
-  letter-spacing: .5px;
-}
-#start-btn:hover {
-  background: linear-gradient(to bottom,
-    #7CCD3A 0%, #6AC032 30%,
-    #439021 50%, #3D8821 51%, #327D16 100%);
-}
-#start-btn.active {
-  background: linear-gradient(to bottom,
-    #4EAE14 0%, #469C12 30%,
-    #266101 50%, #205901 51%, #164D00 100%);
-  box-shadow: inset 0 2px 3px rgba(0,0,0,.4);
-}
-
-/* Quick Launch */
-#ql {
-  display:flex; align-items:center;
-  padding: 0 3px;
-  border-right: 2px solid rgba(0,0,0,.3);
-  border-left: 1px solid rgba(255,255,255,.15);
-  gap: 2px; height:100%; flex-shrink:0;
-}
-.ql-btn {
-  width:22px; height:22px;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; border-radius:2px; font-size:15px;
-}
-.ql-btn:hover { background:rgba(255,255,255,.2); }
-
-/* Taskbar window buttons */
-#tb-btns {
-  flex:1; display:flex; align-items:center;
-  padding:0 4px; gap:3px; min-width:0; height:100%;
-}
-.tb-winbtn {
-  height:22px; min-width:100px; max-width:160px;
-  padding:0 6px;
-  background:linear-gradient(to bottom,
-    #698FC8 0%,#507FC0 50%,#3C6CB4 51%,#2D5CA6 100%);
-  border:1px solid #2857B0; border-radius:3px;
-  color:#fff; font-size:11px; font-family:Tahoma,sans-serif;
-  cursor:pointer; display:flex; align-items:center; gap:4px;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+/* ── Status Bar ─────────────────────────────── */
+#statusbar {
+  height:26px;
+  background: linear-gradient(to bottom, #0a1a0a, #060e06);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 14px;gap:0;
+  font-size:11px;color:var(--text-dim);
   flex-shrink:0;
 }
-.tb-winbtn:hover {
-  background:linear-gradient(to bottom,
-    #7A9FD8 0%,#608FD0 50%,#4C7CC4 51%,#3D6CB6 100%);
+.sb-item {
+  padding:0 12px;border-right:1px solid var(--border);
+  display:flex;align-items:center;gap:5px;height:100%;white-space:nowrap;
 }
-.tb-winbtn.active {
-  background:linear-gradient(to bottom,
-    #3C6CB4 0%,#2C5CA6 50%,#1F4D96 51%,#1A4390 100%);
-  box-shadow:inset 0 2px 3px rgba(0,0,0,.3);
-  border-color:#1A4390;
-}
-.tb-winbtn-ico { width:14px; height:14px; flex-shrink:0; }
-.tb-winbtn-txt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sb-item:last-child{border-right:none;margin-left:auto;}
+.sb-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+.dot-green  { background:var(--green-glow);box-shadow:0 0 6px var(--green-glow); }
+.dot-yellow { background:var(--yellow);box-shadow:0 0 6px var(--yellow); }
+.dot-red    { background:var(--red);box-shadow:0 0 6px var(--red); }
+.sb-bright  { color:var(--green);font-weight:bold; }
 
-/* System Tray */
-#systray {
-  display:flex; align-items:center;
-  padding:0 8px; height:100%;
-  background:linear-gradient(to bottom,
-    #1254AC 0%, #0A4499 50%, #083B90 100%);
-  border-left:1px solid rgba(255,255,255,.12);
-  gap:6px; flex-shrink:0;
-}
-.tray-ico { width:16px; height:16px; cursor:pointer; opacity:.9; }
-.tray-ico:hover { opacity:1; }
-#tray-clock {
-  color:#fff; font-size:11px; font-family:Tahoma,sans-serif;
-  text-align:center; white-space:nowrap; cursor:default;
-  line-height:1.25;
-}
-
-/* ── Start Menu ────────────────────────────────── */
-#start-menu {
-  position:fixed; bottom:30px; left:0;
-  width:380px;
-  border:2px solid #0A5BD6;
-  border-bottom:none; border-radius:8px 8px 0 0;
-  display:none; z-index:9100;
-  box-shadow:3px -3px 14px rgba(0,0,0,.55);
+/* ── Main Layout ────────────────────────────── */
+#main {
+  display:flex;
+  height:calc(100vh - 26px);
   overflow:hidden;
 }
 
-.sm-hdr {
-  background:linear-gradient(135deg,#1B68CC 0%,#4A90DB 40%,#1B68CC 100%);
-  padding:8px 12px; display:flex; align-items:center; gap:10px; height:56px;
-}
-.sm-avatar {
-  width:42px; height:42px;
-  background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);
-  border:2px solid #fff; border-radius:4px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:24px; flex-shrink:0;
-}
-.sm-uname {
-  color:#fff; font-size:14px; font-weight:bold;
-  text-shadow:1px 1px 3px rgba(0,0,0,.5);
+/* ── Terminal Panel (Left) ──────────────────── */
+#term-panel {
+  flex:1;min-width:0;
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--border);
+  background:var(--bg2);
 }
 
-.sm-body { display:flex; height:310px; }
+#term-header {
+  height:22px;background:#040904;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:8px;
+  font-size:10px;color:var(--text-dim);flex-shrink:0;
+}
+.term-dot{width:9px;height:9px;border-radius:50%;}
+.td-red{background:#ff5f56;} .td-yellow{background:#ffbd2e;} .td-green{background:#27c93f;}
 
-.sm-left {
-  flex:1; background:#fff;
-  border-right:1px solid #C5C5C5;
-  display:flex; flex-direction:column; overflow-y:auto;
+#term-output {
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:10px 14px;
+  scroll-behavior:smooth;
 }
-.sm-right {
-  width:162px; background:#D3E5FA;
-  padding:4px 0; overflow-y:auto;
-}
+#term-output::-webkit-scrollbar{width:6px;}
+#term-output::-webkit-scrollbar-track{background:#040904;}
+#term-output::-webkit-scrollbar-thumb{background:var(--green-dark);border-radius:3px;}
 
-.sm-item {
-  padding:4px 10px; cursor:default;
-  display:flex; align-items:center; gap:8px;
-  font-size:12px; white-space:nowrap;
+/* Input bar */
+#term-input-row {
+  height:28px;flex-shrink:0;
+  border-top:1px solid var(--border);
+  background:#040904;
+  display:flex;align-items:center;padding:0 14px;gap:6px;
 }
-.sm-item:hover { background:#316AC5; color:#fff; }
-.sm-item-ico { width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
-.sm-item-lbl { flex:1; font-size:12px; }
-.sm-item-arrow { font-size:9px; color:#666; }
-.sm-item:hover .sm-item-arrow { color:#ccc; }
+#term-prompt-label { color:var(--cyan);white-space:nowrap;font-size:12px; }
+#term-input-display {
+  flex:1;color:var(--green);font-size:12px;font-family:inherit;
+  white-space:nowrap;overflow:hidden;
+}
+.cursor-block {
+  display:inline-block;width:8px;height:13px;
+  background:var(--green-glow);vertical-align:text-bottom;
+  animation:blink 1s step-end infinite;
+  box-shadow:0 0 6px var(--green-glow);
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 
-.sm-sep { height:1px; background:#D0D0D0; margin:3px 0; }
+/* Terminal text colors */
+.t-green   {color:var(--green);}
+.t-bright  {color:var(--green-glow);font-weight:bold;}
+.t-cyan    {color:var(--cyan);}
+.t-yellow  {color:var(--yellow);}
+.t-red     {color:var(--red);}
+.t-dim     {color:var(--text-dim);}
+.t-white   {color:#ccddcc;}
+.t-orange  {color:var(--orange);}
+.t-purple  {color:var(--purple);}
+.t-blue    {color:var(--blue);}
+.t-cmd     {color:var(--cyan);font-weight:bold;}
+.t-comment {color:var(--green-dark);}
 
-.sm-all {
-  margin-top:auto; padding:5px 10px;
-  border-top:1px solid #D0D0D0;
-  cursor:default; display:flex; align-items:center; gap:8px;
-  font-size:12px; font-weight:bold;
-}
-.sm-all:hover { background:#316AC5; color:#fff; }
-.sm-all:hover .sm-item-arrow { color:#fff; }
+/* Output line types */
+.term-line  {white-space:pre-wrap;word-break:break-all;line-height:1.55;}
+.term-input-echo { color:var(--cyan);margin:2px 0; }
+.term-empty { height:6px; }
 
-.sm-right-item {
-  padding:3px 10px; cursor:default;
-  display:flex; align-items:center; gap:7px;
-  font-size:12px; font-weight:bold; color:#003399;
-}
-.sm-right-item:hover { background:#316AC5; color:#fff; }
-.sm-right-sep { height:1px; background:rgba(0,0,0,.15); margin:3px 0; }
-.sm-right-item-ico { width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+/* Bar charts */
+.bar-wrap { display:inline-block;width:120px;height:10px;background:#0a200a;border:1px solid var(--green-dark);vertical-align:middle;position:relative;overflow:hidden; }
+.bar-fill { height:100%;background:var(--green);transition:width 1s; }
+.bar-fill.cyan{background:var(--cyan);}
+.bar-fill.yellow{background:var(--yellow);}
+.bar-fill.red{background:var(--red);}
 
-.sm-footer {
-  background:linear-gradient(to bottom,#1356B0 0%,#0E44A0 100%);
-  height:34px; display:flex; align-items:center;
-  justify-content:flex-end; padding:0 10px; gap:8px;
+/* Glitch effect */
+@keyframes glitch {
+  0%{transform:translate(0);}
+  20%{transform:translate(-2px,1px);filter:hue-rotate(20deg);}
+  40%{transform:translate(2px,-1px);}
+  60%{transform:translate(0);filter:none;}
+  80%{transform:translate(-1px,2px);}
+  100%{transform:translate(0);}
 }
-.sm-foot-btn {
-  height:25px; padding:0 10px;
-  background:linear-gradient(to bottom,#4A88D4 0%,#2E6AB5 100%);
-  border:1px solid rgba(255,255,255,.3); border-radius:3px;
-  color:#fff; font-size:11px; font-family:Tahoma,sans-serif;
-  cursor:pointer; display:flex; align-items:center; gap:4px;
-}
-.sm-foot-btn:hover {
-  background:linear-gradient(to bottom,#5A98E4 0%,#3E7AC5 100%);
-}
+.glitch { animation:glitch 0.15s; }
 
-/* ── Context Menu ──────────────────────────────── */
-.xp-ctx {
-  position:fixed; background:#f6f6f6;
-  border:1px solid #999; box-shadow:2px 2px 7px rgba(0,0,0,.4);
-  display:none; z-index:9300; min-width:180px; padding:2px;
+/* ── Dashboard Panel (Right) ────────────────── */
+#dash {
+  width:300px;flex-shrink:0;
+  background:var(--bg3);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+  gap:0;
 }
-.ctx-item {
-  padding:3px 30px 3px 28px;
-  cursor:default; font-size:11px;
-  display:flex; align-items:center;
-  white-space:nowrap; position:relative;
-}
-.ctx-item:hover { background:#316AC5; color:#fff; }
-.ctx-item .ctx-ico { position:absolute; left:6px; font-size:14px; }
-.ctx-sep { height:1px; background:#D0D0D0; margin:2px 0; }
+#dash::-webkit-scrollbar{width:4px;}
+#dash::-webkit-scrollbar-thumb{background:var(--border);}
 
-/* ── Balloon Tip ───────────────────────────────── */
-#balloon {
-  position:fixed; right:12px; bottom:40px;
-  background:#FFFEE0; border:1px solid #0066CC;
-  border-radius:6px; padding:8px 28px 8px 10px;
-  max-width:240px; box-shadow:2px 2px 8px rgba(0,0,0,.3);
-  font-size:11px; z-index:9500; display:none;
+.dash-widget {
+  border-bottom:1px solid var(--border2);
+  padding:8px 10px;flex-shrink:0;
 }
-.balloon-title {
-  font-weight:bold; color:#003399;
-  margin-bottom:3px; font-size:11px;
-  display:flex; align-items:center; gap:4px;
+.dash-title {
+  font-size:10px;font-weight:bold;
+  color:var(--cyan);letter-spacing:1.5px;
+  margin-bottom:6px;
+  display:flex;align-items:center;gap:6px;
 }
-#balloon-close {
-  position:absolute; top:4px; right:7px;
-  cursor:pointer; font-size:14px; color:#666; line-height:1;
-}
-#balloon-close:hover { color:#CC0000; }
-/* balloon pointer */
-#balloon::after {
-  content:'';
-  position:absolute; bottom:-8px; right:18px;
-  border-left:7px solid transparent;
-  border-right:7px solid transparent;
-  border-top:8px solid #0066CC;
-}
-#balloon::before {
-  content:'';
-  position:absolute; bottom:-6px; right:19px;
-  border-left:6px solid transparent;
-  border-right:6px solid transparent;
-  border-top:7px solid #FFFEE0;
-  z-index:1;
+.dash-title::before {
+  content:'';display:inline-block;width:3px;height:10px;
+  background:var(--cyan);flex-shrink:0;
 }
 
-/* ── Tooltip ───────────────────────────────────── */
-#tooltip {
-  position:fixed; background:#FFFBCC;
-  border:1px solid #000; padding:2px 5px;
-  font-size:11px; pointer-events:none;
-  display:none; z-index:9999;
-  box-shadow:1px 1px 3px rgba(0,0,0,.3);
+/* Stat row */
+.stat-row {
+  display:flex;align-items:center;justify-content:space-between;
+  margin:3px 0;font-size:11px;
 }
+.stat-label{color:var(--text-dim);}
+.stat-val  {color:var(--green);font-weight:bold;}
 
-/* ── Window Layout Helpers ─────────────────────── */
-.win-inner {
-  display:flex; flex-direction:column;
-  height:100%; position:relative;
-}
-.win-body-full { flex:1; overflow:hidden; display:flex; }
+/* Mini bar (dashboard) */
+.mbar-wrap{display:flex;align-items:center;gap:5px;width:100%;margin:3px 0;}
+.mbar-name{color:var(--text-dim);font-size:10px;width:32px;flex-shrink:0;}
+.mbar-track{flex:1;height:7px;background:#0a200a;border:1px solid var(--green-dark);overflow:hidden;}
+.mbar-fill{height:100%;background:var(--green);transition:width 2s;}
+.mbar-fill.c{background:var(--cyan);}
+.mbar-fill.y{background:var(--yellow);}
+.mbar-fill.r{background:var(--red);}
+.mbar-pct{color:var(--green);font-size:10px;width:30px;text-align:right;}
 
-/* resize grip (bottom-right) */
-.xpwin::after {
-  content:'';
-  position:absolute; bottom:2px; right:2px;
-  width:13px; height:13px;
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      transparent 0px, transparent 2px,
-      rgba(0,0,0,.15) 2px, rgba(0,0,0,.15) 3px
-    );
-  pointer-events:none;
+/* Threat level */
+.threat-badge {
+  display:inline-block;padding:2px 10px;border-radius:2px;
+  font-size:11px;font-weight:bold;letter-spacing:1px;
+  border:1px solid;margin:4px 0;
 }
+.threat-low    { color:#33ff33;border-color:#33ff33;background:rgba(50,255,50,0.08); }
+.threat-medium { color:#ffcc00;border-color:#ffcc00;background:rgba(255,200,0,0.08); }
+.threat-high   { color:#ff4444;border-color:#ff4444;background:rgba(255,50,50,0.08); }
 
-/* resize handles */
-.rh-right { position:absolute; right:0; top:0; bottom:0; width:5px; cursor:e-resize; z-index:10; }
-.rh-bottom { position:absolute; left:0; right:0; bottom:0; height:5px; cursor:s-resize; z-index:10; }
-.rh-corner { position:absolute; right:0; bottom:0; width:14px; height:14px; cursor:se-resize; z-index:11; }
+/* Log feed */
+#log-feed {
+  height:140px;overflow-y:auto;
+  font-size:10px;line-height:1.55;
+  padding:2px 0;
+}
+#log-feed::-webkit-scrollbar{width:3px;}
+#log-feed::-webkit-scrollbar-thumb{background:var(--border);}
+.log-entry{padding:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.log-info  {color:var(--text-dim);}
+.log-ok    {color:var(--green);}
+.log-warn  {color:var(--yellow);}
+.log-err   {color:var(--red);}
+.log-ai    {color:var(--purple);}
 
-/* ── About content ─────────────────────────────── */
-.about-header {
-  background:linear-gradient(to right,#E8F0FE 0%,#D0E4FC 100%);
-  border:1px solid #BAD0F0; padding:10px 12px;
-  margin-bottom:12px; border-radius:2px;
-  display:flex; align-items:center; gap:12px;
+/* Network connections */
+.conn-row {
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:10px;padding:1.5px 0;border-bottom:1px solid #091509;
 }
-.about-avatar {
-  width:52px; height:52px;
-  background:linear-gradient(135deg,#4A9eff 0%,#1E5BB8 100%);
-  border-radius:4px; display:flex; align-items:center;
-  justify-content:center; font-size:30px; flex-shrink:0;
-  box-shadow:0 2px 6px rgba(0,0,0,.2);
-}
-.about-name { font-size:15px; font-weight:bold; color:#003399; }
-.about-title { font-size:12px; color:#555; margin-top:3px; }
-.about-status {
-  display:inline-block; margin-top:4px;
-  background:#E0FFE0; border:1px solid #80C080;
-  padding:1px 6px; font-size:10px; color:#006600; border-radius:2px;
-}
+.conn-ip{color:var(--cyan-dim);}
+.conn-port{color:var(--text-dim);}
+.conn-state-e{color:var(--green);}
+.conn-state-l{color:var(--yellow);}
+
+/* AI model status */
+.model-row{font-size:10px;padding:2px 0;display:flex;justify-content:space-between;}
+.model-name{color:var(--cyan-dim);}
+.model-acc{color:var(--yellow);}
+.model-run{color:var(--green);}
 
 </style>
 </head>
 <body>
 
-<!-- Cursor -->
-<svg id="cursor" viewBox="0 0 20 24">
-  <polygon points="2,2 2,18 6,14 9,20 11.5,19 8.5,13 15,13"
-    fill="white" stroke="black" stroke-width="1" stroke-linejoin="round"/>
+<!-- SVG Cursor (crosshair style) -->
+<svg id="cursor" viewBox="0 0 18 18" fill="none">
+  <line x1="9" y1="0" x2="9" y2="7"   stroke="#33ff33" stroke-width="1.2"/>
+  <line x1="9" y1="11" x2="9" y2="18" stroke="#33ff33" stroke-width="1.2"/>
+  <line x1="0" y1="9" x2="7" y2="9"   stroke="#33ff33" stroke-width="1.2"/>
+  <line x1="11" y1="9" x2="18" y2="9" stroke="#33ff33" stroke-width="1.2"/>
+  <rect x="6.5" y="6.5" width="5" height="5" stroke="#33ff33" stroke-width="1" fill="rgba(51,255,51,0.12)"/>
 </svg>
 
-<!-- Desktop Background: Bliss SVG -->
-<div id="desktop-bg">
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1280 800" preserveAspectRatio="xMidYMid slice">
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#5FA8DC"/>
-      <stop offset="55%" stop-color="#9EC8E8"/>
-      <stop offset="100%" stop-color="#C0D9EE"/>
-    </linearGradient>
-    <linearGradient id="hills-bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#5BB81A"/>
-      <stop offset="100%" stop-color="#3E9010"/>
-    </linearGradient>
-    <linearGradient id="hill-main" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#6DD11E"/>
-      <stop offset="100%" stop-color="#3E9010"/>
-    </linearGradient>
-    <linearGradient id="hill-left" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#56B814"/>
-      <stop offset="100%" stop-color="#3A8808"/>
-    </linearGradient>
-    <filter id="blur1"><feGaussianBlur stdDeviation="3"/></filter>
-    <filter id="blur2"><feGaussianBlur stdDeviation="5"/></filter>
-  </defs>
-  <!-- Sky -->
-  <rect fill="url(#sky)" width="1280" height="800"/>
-  <!-- Clouds -->
-  <g opacity=".92">
-    <ellipse cx="250" cy="130" rx="90" ry="38" fill="white" filter="url(#blur1)"/>
-    <ellipse cx="310" cy="115" rx="70" ry="30" fill="white" filter="url(#blur1)"/>
-    <ellipse cx="190" cy="145" rx="60" ry="25" fill="white" filter="url(#blur1)"/>
-  </g>
-  <g opacity=".88">
-    <ellipse cx="800" cy="100" rx="110" ry="42" fill="white" filter="url(#blur1)"/>
-    <ellipse cx="870" cy="85" rx="80" ry="33" fill="white" filter="url(#blur1)"/>
-    <ellipse cx="730" cy="115" rx="70" ry="28" fill="white" filter="url(#blur1)"/>
-  </g>
-  <g opacity=".7">
-    <ellipse cx="1100" cy="140" rx="80" ry="32" fill="white" filter="url(#blur2)"/>
-    <ellipse cx="1160" cy="125" rx="60" ry="26" fill="white" filter="url(#blur2)"/>
-  </g>
-  <!-- Distant hills -->
-  <ellipse cx="200" cy="620" rx="500" ry="260" fill="#4EAA12" opacity=".6" filter="url(#blur2)"/>
-  <ellipse cx="1100" cy="650" rx="450" ry="230" fill="#4EAA12" opacity=".55" filter="url(#blur2)"/>
-  <!-- Background hills -->
-  <ellipse cx="640" cy="720" rx="900" ry="350" fill="url(#hills-bg)"/>
-  <!-- Main foreground hill (the iconic rolling mound) -->
-  <ellipse cx="620" cy="900" rx="820" ry="430" fill="url(#hill-main)"/>
-  <!-- Side hills -->
-  <ellipse cx="-80" cy="780" rx="480" ry="280" fill="url(#hill-left)"/>
-  <ellipse cx="1380" cy="790" rx="500" ry="290" fill="#50B015"/>
-  <!-- Ground floor -->
-  <rect x="0" y="720" width="1280" height="80" fill="#3E9010"/>
-</svg>
+<!-- Boot Screen -->
+<div id="boot">
+  <div id="boot-text"></div>
 </div>
 
-<!-- Desktop Icons -->
-<div id="desktop">
-  <div class="dicon" data-win="about" ondblclick="openWin('about')" onclick="selIcon(this)">
-    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="2" y="2" width="28" height="28" rx="3" fill="#4A9EFF"/><rect x="4" y="4" width="26" height="26" rx="2" fill="#6BB8FF"/><text x="16" y="21" text-anchor="middle" font-size="16" fill="white">👤</text></svg>
-    <div class="dicon-lbl">About Me</div>
+<!-- Status Bar -->
+<div id="statusbar">
+  <div class="sb-item">
+    <div class="sb-dot dot-green"></div>
+    <span class="sb-bright">AI-SEC-WS-01</span>
   </div>
-  <div class="dicon" data-win="skills" ondblclick="openWin('skills')" onclick="selIcon(this)">
-    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="2" fill="#6A6A6A"/><rect x="4" y="8" width="24" height="14" rx="1" fill="#00D0FF"/><rect x="10" y="22" width="12" height="4" fill="#8A8A8A"/><rect x="8" y="26" width="16" height="2" fill="#5A5A5A"/></svg>
-    <div class="dicon-lbl">Skills.txt</div>
+  <div class="sb-item">
+    <span>IPv4</span>
+    <span class="sb-bright">192.168.0.101</span>
   </div>
-  <div class="dicon" data-win="projects" ondblclick="openWin('projects')" onclick="selIcon(this)">
-    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="1" y="8" width="30" height="20" rx="1" fill="#F0B340"/><rect x="1" y="12" width="30" height="16" rx="1" fill="#F5C842"/><path d="M1 12 L1 10 Q1 8 5 8 L14 8 L16 12 Z" fill="#E09A20"/></svg>
-    <div class="dicon-lbl">Projects</div>
+  <div class="sb-item">
+    <span>SESSION</span>
+    <span class="sb-bright" id="sb-session">00:00:00</span>
   </div>
-  <div class="dicon" data-win="contact" ondblclick="openWin('contact')" onclick="selIcon(this)">
-    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="2" fill="#ECE9D8" stroke="#888" stroke-width="1"/><path d="M2 8 L16 18 L30 8" fill="none" stroke="#888" stroke-width="1.5"/><rect x="3" y="8" width="12" height="8" rx="1" fill="#4A9EFF" opacity=".3"/></svg>
-    <div class="dicon-lbl">Contact</div>
+  <div class="sb-item">
+    <span>UPTIME</span>
+    <span class="sb-bright">847d 12h 33m</span>
   </div>
-  <div class="dicon" data-win="resume" ondblclick="openWin('resume')" onclick="selIcon(this)">
-    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="5" y="1" width="19" height="26" rx="1" fill="white" stroke="#AAA" stroke-width="1"/><path d="M18 1 L24 7 L18 7 Z" fill="#CCC"/><line x1="8" y1="10" x2="22" y2="10" stroke="#AAA" stroke-width="1.2"/><line x1="8" y1="13" x2="22" y2="13" stroke="#AAA" stroke-width="1.2"/><line x1="8" y1="16" x2="18" y2="16" stroke="#AAA" stroke-width="1.2"/><rect x="3" y="18" width="20" height="12" rx="1" fill="#E03535" opacity=".9"/><text x="13" y="27" text-anchor="middle" font-size="8" font-weight="bold" fill="white">PDF</text></svg>
-    <div class="dicon-lbl">Resume.pdf</div>
+  <div class="sb-item">
+    <span>THREATS</span>
+    <div class="sb-dot dot-green"></div>
+    <span class="sb-bright" id="sb-threats">0 ACTIVE</span>
   </div>
-  <div class="dicon" onclick="selIcon(this)">
-    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="2" y="4" width="28" height="20" rx="2" fill="#DDD" stroke="#AAA" stroke-width="1"/><rect x="4" y="6" width="24" height="14" rx="1" fill="#222"/><ellipse cx="16" cy="27" rx="8" ry="2" fill="#CCC"/><rect x="10" y="24" width="12" height="3" fill="#DDD"/></svg>
-    <div class="dicon-lbl">My Computer</div>
-  </div>
-  <div class="dicon" onclick="selIcon(this)">
-    <svg class="dicon-img" viewBox="0 0 32 32"><rect x="1" y="10" width="30" height="19" rx="1" fill="#F5C842"/><path d="M1 13 L1 11 Q1 9 5 9 L14 9 L16 13 Z" fill="#E09A20"/><rect x="3" y="15" width="6" height="8" rx="1" fill="white" opacity=".6"/><rect x="11" y="15" width="6" height="8" rx="1" fill="white" opacity=".6"/><rect x="19" y="15" width="6" height="8" rx="1" fill="white" opacity=".6"/></svg>
-    <div class="dicon-lbl">My Documents</div>
-  </div>
-  <div class="dicon" onclick="selIcon(this)">
-    <svg class="dicon-img" viewBox="0 0 32 32"><path d="M6 8 L26 8 L28 28 L4 28 Z" fill="#DDD" stroke="#AAA" stroke-width="1"/><path d="M8 8 L24 8 L22 4 L10 4 Z" fill="#CCC" stroke="#AAA" stroke-width="1"/><line x1="12" y1="14" x2="20" y2="14" stroke="#888" stroke-width="1.5"/><line x1="11" y1="18" x2="21" y2="18" stroke="#888" stroke-width="1.2"/></svg>
-    <div class="dicon-lbl">Recycle Bin</div>
+  <div class="sb-item">
+    <span id="sb-clock" class="sb-bright">--:--:--</span>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     WINDOWS
-     ══════════════════════════════════════════════ -->
+<!-- Main Layout -->
+<div id="main">
 
-<!-- About Me Window -->
-<div class="xpwin" id="win-about" style="left:80px;top:40px;width:530px;height:440px;">
-  <div class="win-inner">
-    <div class="win-tb" id="tb-about">
-      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect width="16" height="16" rx="2" fill="#4A9EFF"/><text x="8" y="12" text-anchor="middle" font-size="10" fill="white">👤</text></svg>
-      <span class="win-tb-title">About Me — Park Seongho</span>
-      <div class="win-btns">
-        <div class="wbtn wmin" data-win="about" data-action="min">&#x2013;</div>
-        <div class="wbtn wmax" data-win="about" data-action="max">&#x25A1;</div>
-        <div class="wbtn wclose" data-win="about" data-action="close">&#x2715;</div>
-      </div>
+  <!-- Terminal Panel -->
+  <div id="term-panel">
+    <div id="term-header">
+      <div class="term-dot td-red"></div>
+      <div class="term-dot td-yellow"></div>
+      <div class="term-dot td-green"></div>
+      <span style="margin-left:8px;color:#1a5a1a;">bash — root@ai-sec-ws-01 — 80×24</span>
     </div>
-    <div class="win-menu">
-      <span class="mitem">File</span><span class="mitem">Edit</span>
-      <span class="mitem">View</span><span class="mitem">Favorites</span>
-      <span class="mitem">Tools</span><span class="mitem">Help</span>
-    </div>
-    <div class="win-toolbar">
-      <button class="tbtn dis">◀ Back</button>
-      <button class="tbtn dis">Forward ▶</button>
-      <div class="tsep"></div>
-      <button class="tbtn">⬆ Up</button>
-      <div class="tsep"></div>
-      <button class="tbtn">🔍 Search</button>
-      <button class="tbtn">📁 Folders</button>
-    </div>
-    <div class="win-addr">
-      <span class="addr-lbl">Address</span>
-      <input class="addr-inp" value="C:\Documents and Settings\Park Seongho\Desktop\About Me" readonly>
-      <button class="addr-go">Go</button>
-    </div>
-    <div class="win-body-full">
-      <div class="win-sidebar">
-        <div class="sb-sec-hdr">File and Folder Tasks ▴</div>
-        <div class="sb-sec-body">
-          <div class="sb-link">✏️ Rename</div>
-          <div class="sb-link">📋 Copy</div>
-          <div class="sb-link">📧 E-mail</div>
-        </div>
-        <div class="sb-sec-hdr">Other Places ▴</div>
-        <div class="sb-sec-body">
-          <div class="sb-link">🖥️ My Computer</div>
-          <div class="sb-link">📁 My Documents</div>
-          <div class="sb-link">🌐 Network</div>
-        </div>
-        <div class="sb-sec-hdr">Details ▴</div>
-        <div class="sb-details">
-          <div class="sb-details-icon">👤</div>
-          <div class="sb-details-name">About Me</div>
-          <div class="sb-details-info">File Folder<br>Date: 2024</div>
-        </div>
-      </div>
-      <div class="win-content">
-        <div class="about-header">
-          <div class="about-avatar">👨‍💻</div>
-          <div>
-            <div class="about-name">Park Seongho (박성호)</div>
-            <div class="about-title">AI Security Engineer</div>
-            <div class="about-status">● Available for Work</div>
-          </div>
-        </div>
-        <div class="xp-h2">🎯 Profile</div>
-        <div class="infobox"><strong>Position:</strong> AI Security Engineer</div>
-        <div class="infobox"><strong>Specialization:</strong> AI Security · Machine Learning Security · Cybersecurity</div>
-        <div class="infobox"><strong>Focus:</strong> Securing AI/ML systems and developing robust security solutions</div>
-        <p style="margin-top:10px;color:#333;font-size:12px;line-height:1.6;">
-          Passionate about identifying and mitigating vulnerabilities in AI and machine
-          learning systems. Dedicated to advancing the field of AI security through research,
-          development, and implementation of cutting-edge security measures.
-        </p>
-      </div>
-    </div>
-    <div class="win-status">
-      <div class="status-pane">1 object(s)</div>
-      <div class="status-pane">🖥️ My Computer</div>
+    <div id="term-output"></div>
+    <div id="term-input-row">
+      <span id="term-prompt-label">root@ai-sec:~$</span>
+      <div id="term-input-display"><span id="term-typed"></span><span class="cursor-block"></span></div>
     </div>
   </div>
-  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
-</div>
 
-<!-- Skills Window -->
-<div class="xpwin" id="win-skills" style="left:130px;top:90px;width:590px;height:500px;">
-  <div class="win-inner">
-    <div class="win-tb" id="tb-skills">
-      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect width="16" height="16" rx="2" fill="#5577AA"/><text x="8" y="12" text-anchor="middle" font-size="9" fill="white">💻</text></svg>
-      <span class="win-tb-title">Skills.txt — Notepad</span>
-      <div class="win-btns">
-        <div class="wbtn wmin" data-win="skills" data-action="min">&#x2013;</div>
-        <div class="wbtn wmax" data-win="skills" data-action="max">&#x25A1;</div>
-        <div class="wbtn wclose" data-win="skills" data-action="close">&#x2715;</div>
+  <!-- Dashboard Panel -->
+  <div id="dash">
+
+    <!-- System Stats -->
+    <div class="dash-widget">
+      <div class="dash-title">SYSTEM STATUS</div>
+      <div class="mbar-wrap"><span class="mbar-name">CPU</span><div class="mbar-track"><div class="mbar-fill" id="d-cpu" style="width:42%"></div></div><span class="mbar-pct" id="d-cpu-t">42%</span></div>
+      <div class="mbar-wrap"><span class="mbar-name">RAM</span><div class="mbar-track"><div class="mbar-fill c" id="d-ram" style="width:68%"></div></div><span class="mbar-pct" id="d-ram-t">68%</span></div>
+      <div class="mbar-wrap"><span class="mbar-name">NET↓</span><div class="mbar-track"><div class="mbar-fill y" id="d-net" style="width:23%"></div></div><span class="mbar-pct" id="d-net-t">23%</span></div>
+      <div class="mbar-wrap"><span class="mbar-name">DISK</span><div class="mbar-track"><div class="mbar-fill" id="d-dsk" style="width:55%"></div></div><span class="mbar-pct" id="d-dsk-t">55%</span></div>
+      <div style="margin-top:5px;display:flex;justify-content:space-between;">
+        <span style="font-size:10px;color:var(--text-dim);">Processes: <span style="color:var(--green);">247</span></span>
+        <span style="font-size:10px;color:var(--text-dim);">Load: <span style="color:var(--green);">1.24</span></span>
       </div>
     </div>
-    <div class="win-menu">
-      <span class="mitem">File</span><span class="mitem">Edit</span>
-      <span class="mitem">Format</span><span class="mitem">View</span>
-      <span class="mitem">Help</span>
+
+    <!-- Security Status -->
+    <div class="dash-widget">
+      <div class="dash-title">SECURITY STATUS</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:10px;color:var(--text-dim);">THREAT LEVEL</span>
+        <span class="threat-badge threat-low" id="d-threat">LOW</span>
+      </div>
+      <div class="stat-row"><span class="stat-label">IDS Rules Active</span><span class="stat-val">24,891</span></div>
+      <div class="stat-row"><span class="stat-label">CVEs Monitored</span><span class="stat-val">1,204</span></div>
+      <div class="stat-row"><span class="stat-label">Blocked Today</span><span class="stat-val t-yellow" id="d-blocked">47</span></div>
+      <div class="stat-row"><span class="stat-label">Last ML Scan</span><span class="stat-val" id="d-scan-ago">2m ago</span></div>
+      <div class="stat-row"><span class="stat-label">Firewall</span><span class="stat-val t-cyan">ACTIVE</span></div>
+      <div class="stat-row"><span class="stat-label">Encryption</span><span class="stat-val t-cyan">AES-256</span></div>
     </div>
-    <div class="win-body-full" style="flex-direction:column;">
-      <div class="win-content" style="background:#fff;font-family:Consolas,'Courier New',monospace;font-size:12px;padding:8px 12px;">
-        <div class="xp-h2">💡 Core Competencies</div>
-        <div class="skill-grid">
-          <div class="skill-tag">🔒 AI/ML Security</div>
-          <div class="skill-tag">🛡️ Adversarial ML</div>
-          <div class="skill-tag">🔍 Penetration Testing</div>
-          <div class="skill-tag">⚠️ Vulnerability Analysis</div>
-          <div class="skill-tag">🌐 Network Security</div>
-          <div class="skill-tag">🏗️ Security Architecture</div>
-          <div class="skill-tag">🐍 Python / Security Tools</div>
-          <div class="skill-tag">🎯 Threat Modeling</div>
-          <div class="skill-tag">☁️ Cloud Security</div>
-          <div class="skill-tag">🐳 Container Security</div>
-          <div class="skill-tag">📊 Data Privacy</div>
-          <div class="skill-tag">🔐 Cryptography</div>
-        </div>
-        <div class="xp-h3">🎓 Expertise Areas</div>
-        <div class="infobox">Model Robustness &amp; Adversarial Attacks</div>
-        <div class="infobox">Data Poisoning Detection &amp; Prevention</div>
-        <div class="infobox">Secure ML Pipeline Development</div>
-        <div class="infobox">AI System Security Auditing</div>
-        <div class="infobox">Zero-day Vulnerability Research</div>
+
+    <!-- AI Models -->
+    <div class="dash-widget">
+      <div class="dash-title">AI/ML MODELS</div>
+      <div class="model-row"><span class="model-name">adversarial_det_v4</span><span class="model-acc">99.2%</span><span class="model-run">● RUN</span></div>
+      <div class="model-row"><span class="model-name">anomaly_detector</span><span class="model-acc">97.8%</span><span class="model-run">● RUN</span></div>
+      <div class="model-row"><span class="model-name">malware_classifier</span><span class="model-acc">98.5%</span><span class="model-run">● RUN</span></div>
+      <div class="model-row"><span class="model-name">llm_guard_v2</span><span class="model-acc">96.1%</span><span class="model-run t-yellow">● IDLE</span></div>
+      <div style="margin-top:5px;font-size:10px;color:var(--text-dim);">
+        Framework: <span style="color:var(--cyan);">PyTorch 2.1</span> &nbsp;|&nbsp;
+        GPU: <span style="color:var(--cyan);">RTX 4090</span>
       </div>
     </div>
-    <div class="win-status">
-      <div class="status-pane">Ln 1, Col 1</div>
-      <div class="status-pane">100%</div>
-      <div class="status-pane">Windows (CRLF)</div>
-      <div class="status-pane">UTF-8</div>
-    </div>
-  </div>
-  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
-</div>
 
-<!-- Projects Window -->
-<div class="xpwin" id="win-projects" style="left:180px;top:130px;width:640px;height:540px;">
-  <div class="win-inner">
-    <div class="win-tb" id="tb-projects">
-      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect x="0" y="4" width="16" height="10" rx="1" fill="#F5C842"/><path d="M0 6 L0 5 Q0 4 3 4 L8 4 L9 6 Z" fill="#E09A20"/></svg>
-      <span class="win-tb-title">Projects — Windows Explorer</span>
-      <div class="win-btns">
-        <div class="wbtn wmin" data-win="projects" data-action="min">&#x2013;</div>
-        <div class="wbtn wmax" data-win="projects" data-action="max">&#x25A1;</div>
-        <div class="wbtn wclose" data-win="projects" data-action="close">&#x2715;</div>
+    <!-- Active Connections -->
+    <div class="dash-widget">
+      <div class="dash-title">CONNECTIONS</div>
+      <div class="conn-row"><span class="conn-ip">10.0.0.12</span><span class="conn-port">:443</span><span class="conn-state-e">ESTABLISHED</span></div>
+      <div class="conn-row"><span class="conn-ip">10.0.0.34</span><span class="conn-port">:22</span><span class="conn-state-e">ESTABLISHED</span></div>
+      <div class="conn-row"><span class="conn-ip">172.16.0.5</span><span class="conn-port">:8080</span><span class="conn-state-l">LISTEN</span></div>
+      <div class="conn-row"><span class="conn-ip" id="conn-dynamic">192.168.1.87</span><span class="conn-port">:443</span><span class="conn-state-e">ESTABLISHED</span></div>
+      <div style="margin-top:4px;font-size:10px;color:var(--text-dim);">
+        <span id="conn-count">4</span> active ·
+        <span style="color:var(--green);" id="conn-bytes">2.4 MB/s</span>
       </div>
     </div>
-    <div class="win-menu">
-      <span class="mitem">File</span><span class="mitem">Edit</span>
-      <span class="mitem">View</span><span class="mitem">Favorites</span>
-      <span class="mitem">Tools</span><span class="mitem">Help</span>
-    </div>
-    <div class="win-toolbar">
-      <button class="tbtn dis">◀ Back</button>
-      <button class="tbtn dis">Forward ▶</button>
-      <div class="tsep"></div>
-      <button class="tbtn">⬆ Up</button>
-      <div class="tsep"></div>
-      <button class="tbtn">🔍 Search</button>
-      <button class="tbtn">📁 Folders</button>
-      <div class="tsep"></div>
-      <button class="tbtn">⠿ Views</button>
-    </div>
-    <div class="win-addr">
-      <span class="addr-lbl">Address</span>
-      <input class="addr-inp" value="C:\My Documents\Projects" readonly>
-      <button class="addr-go">Go</button>
-    </div>
-    <div class="win-body-full">
-      <div class="win-sidebar">
-        <div class="sb-sec-hdr">File and Folder Tasks ▴</div>
-        <div class="sb-sec-body">
-          <div class="sb-link">📁 New Folder</div>
-          <div class="sb-link">🌐 Share Folder</div>
-        </div>
-        <div class="sb-sec-hdr">Other Places ▴</div>
-        <div class="sb-sec-body">
-          <div class="sb-link">🖥️ My Computer</div>
-          <div class="sb-link">📁 My Documents</div>
-          <div class="sb-link">🗑️ Recycle Bin</div>
-        </div>
-        <div class="sb-sec-hdr">Details ▴</div>
-        <div class="sb-details">
-          <div class="sb-details-icon">📁</div>
-          <div class="sb-details-name">Projects</div>
-          <div class="sb-details-info">File Folder<br>4 items</div>
-        </div>
-      </div>
-      <div class="win-content">
-        <div class="xp-h2">🚀 Featured Work</div>
-        <div class="proj-card">
-          <div class="proj-card-title">🤖 AI Security Research</div>
-          <p>Research and development in adversarial machine learning, model robustness
-          testing, and defense mechanisms against AI attacks. Published findings on
-          novel attack vectors targeting large language models.</p>
-        </div>
-        <div class="proj-card">
-          <div class="proj-card-title">🔐 ML Security Framework</div>
-          <p>Development of comprehensive security frameworks for machine learning pipelines,
-          including data validation, model monitoring, and anomaly detection systems
-          deployed in production environments.</p>
-        </div>
-        <div class="proj-card">
-          <div class="proj-card-title">🛡️ Security Auditing Tools</div>
-          <p>Creation of automated tools for security assessment of AI/ML systems,
-          vulnerability scanning, and compliance checking across enterprise deployments.</p>
-        </div>
-        <div class="proj-card">
-          <div class="proj-card-title">☁️ Cloud Security Solutions</div>
-          <p>Implementation of security measures for cloud-based AI services, including
-          access control, encryption, and secure deployment strategies for AWS/GCP.</p>
-        </div>
-      </div>
-    </div>
-    <div class="win-status">
-      <div class="status-pane">4 object(s)</div>
-      <div class="status-pane">🖥️ My Computer</div>
-    </div>
-  </div>
-  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
-</div>
 
-<!-- Contact Window -->
-<div class="xpwin" id="win-contact" style="left:220px;top:170px;width:490px;height:390px;">
-  <div class="win-inner">
-    <div class="win-tb" id="tb-contact">
-      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1" fill="#ECE9D8" stroke="#888" stroke-width=".8"/><path d="M1 4 L8 9 L15 4" fill="none" stroke="#888" stroke-width="1"/></svg>
-      <span class="win-tb-title">Contact Information — Outlook Express</span>
-      <div class="win-btns">
-        <div class="wbtn wmin" data-win="contact" data-action="min">&#x2013;</div>
-        <div class="wbtn wmax" data-win="contact" data-action="max">&#x25A1;</div>
-        <div class="wbtn wclose" data-win="contact" data-action="close">&#x2715;</div>
-      </div>
+    <!-- Event Log -->
+    <div class="dash-widget" style="flex:1;">
+      <div class="dash-title">EVENT LOG</div>
+      <div id="log-feed"></div>
     </div>
-    <div class="win-menu">
-      <span class="mitem">File</span><span class="mitem">Edit</span>
-      <span class="mitem">View</span><span class="mitem">Tools</span>
-      <span class="mitem">Message</span><span class="mitem">Help</span>
-    </div>
-    <div class="win-toolbar">
-      <button class="tbtn">📨 New Mail</button>
-      <button class="tbtn">📬 Reply</button>
-      <div class="tsep"></div>
-      <button class="tbtn">📤 Send/Recv</button>
-      <div class="tsep"></div>
-      <button class="tbtn">📇 Addresses</button>
-    </div>
-    <div class="win-body-full">
-      <div class="win-content">
-        <div class="xp-h2">📬 Get In Touch</div>
-        <div class="infobox">
-          <strong>📧 Email:</strong>
-          <a href="mailto:psh243360@gmail.com" style="color:#0645AD;text-decoration:none;">psh243360@gmail.com</a>
-        </div>
-        <div class="infobox"><strong>💼 Status:</strong> Open to opportunities</div>
-        <div class="infobox"><strong>🌍 Location:</strong> South Korea · Remote Available</div>
-        <p style="margin-top:12px;color:#333;font-size:12px;line-height:1.6;">
-          Feel free to reach out for collaborations, consulting opportunities,
-          or to discuss AI security topics. I'm always interested in connecting
-          with fellow security professionals and researchers.
-        </p>
-        <div style="margin-top:14px;padding:10px;background:#F0F8E8;border:1px solid #90C060;border-radius:2px;">
-          <strong style="color:#006600;">✔ Currently Available:</strong>
-          <span style="color:#333;font-size:11px;"> Full-time · Part-time · Contract</span>
-        </div>
-      </div>
-    </div>
-    <div class="win-status">
-      <div class="status-pane">Inbox: 0 unread</div>
-      <div class="status-pane">🌐 Online</div>
-    </div>
-  </div>
-  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
-</div>
 
-<!-- Resume Window -->
-<div class="xpwin" id="win-resume" style="left:260px;top:200px;width:540px;height:460px;">
-  <div class="win-inner">
-    <div class="win-tb" id="tb-resume">
-      <svg class="win-tb-icon" viewBox="0 0 16 16"><rect x="2" y="0" width="10" height="14" rx="1" fill="white" stroke="#AAA" stroke-width=".8"/><path d="M9 0 L12 3 L9 3 Z" fill="#CCC"/><rect x="1" y="9" width="11" height="7" rx="1" fill="#E03535"/><text x="6.5" y="15" text-anchor="middle" font-size="5" font-weight="bold" fill="white">PDF</text></svg>
-      <span class="win-tb-title">Resume.pdf — Adobe Reader</span>
-      <div class="win-btns">
-        <div class="wbtn wmin" data-win="resume" data-action="min">&#x2013;</div>
-        <div class="wbtn wmax" data-win="resume" data-action="max">&#x25A1;</div>
-        <div class="wbtn wclose" data-win="resume" data-action="close">&#x2715;</div>
-      </div>
-    </div>
-    <div class="win-menu">
-      <span class="mitem">File</span><span class="mitem">Edit</span>
-      <span class="mitem">View</span><span class="mitem">Document</span>
-      <span class="mitem">Tools</span><span class="mitem">Help</span>
-    </div>
-    <div class="win-toolbar">
-      <button class="tbtn dis">◀</button>
-      <button class="tbtn dis">▶</button>
-      <div class="tsep"></div>
-      <button class="tbtn">🔍 Find</button>
-      <button class="tbtn">🖨️ Print</button>
-      <div class="tsep"></div>
-      <select style="height:20px;font-size:11px;font-family:Tahoma,sans-serif;border:1px solid #7F9DB9;">
-        <option>100%</option><option>75%</option><option>125%</option>
-      </select>
-    </div>
-    <div class="win-body-full">
-      <div class="win-content" style="background:#808080;display:flex;justify-content:center;padding:16px;">
-        <!-- PDF page simulation -->
-        <div style="background:white;width:460px;min-height:580px;box-shadow:0 4px 12px rgba(0,0,0,.5);padding:28px 32px;font-family:Times New Roman,serif;">
-          <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:14px;">
-            <div style="font-size:20px;font-weight:bold;">Park Seongho</div>
-            <div style="font-size:12px;color:#444;margin-top:3px;">AI Security Engineer</div>
-            <div style="font-size:11px;color:#666;margin-top:2px;">psh243360@gmail.com</div>
-          </div>
-          <div style="font-size:13px;font-weight:bold;border-bottom:1px solid #888;margin-bottom:6px;">EDUCATION</div>
-          <div style="font-size:11px;margin-bottom:10px;">
-            <strong>Computer Science &amp; Security Engineering</strong><br>
-            <span style="color:#555;">Focus: AI Systems, Cybersecurity</span>
-          </div>
-          <div style="font-size:13px;font-weight:bold;border-bottom:1px solid #888;margin-bottom:6px;">CERTIFICATIONS</div>
-          <div style="font-size:11px;margin-bottom:10px;">
-            • AI/ML Security Specialist<br>
-            • Cybersecurity Professional<br>
-            • Cloud Security (AWS/GCP)
-          </div>
-          <div style="font-size:13px;font-weight:bold;border-bottom:1px solid #888;margin-bottom:6px;">SKILLS</div>
-          <div style="font-size:11px;margin-bottom:10px;">
-            Python · TensorFlow · PyTorch · Kubernetes<br>
-            Penetration Testing · SIEM · IDS/IPS<br>
-            Docker · AWS · GCP · Azure
-          </div>
-          <div style="font-size:13px;font-weight:bold;border-bottom:1px solid #888;margin-bottom:6px;">INTERESTS</div>
-          <div style="font-size:11px;">
-            AI Safety &amp; Ethics · Emerging Security Threats<br>
-            Open Source Security · CTF Competitions
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="win-status">
-      <div class="status-pane">Page 1 of 1</div>
-      <div class="status-pane">Resume.pdf</div>
-    </div>
-  </div>
-  <div class="rh-right"></div><div class="rh-bottom"></div><div class="rh-corner"></div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     TASKBAR
-     ══════════════════════════════════════════════ -->
-<div id="taskbar">
-
-  <!-- Start Button -->
-  <button id="start-btn" onclick="toggleStart()">
-    <!-- Windows XP 4-color flag logo -->
-    <svg width="18" height="18" viewBox="0 0 20 20">
-      <path d="M0 2 L9 0 L9 9 L0 8 Z" fill="#E00000"/>
-      <path d="M10 0 L20 2 L20 8 L10 9 Z" fill="#00AB00"/>
-      <path d="M0 10 L9 10 L9 20 L0 18 Z" fill="#0000E0"/>
-      <path d="M10 10 L20 10 L20 18 L10 20 Z" fill="#E0E000"/>
-    </svg>
-    <span>start</span>
-  </button>
-
-  <!-- Quick Launch -->
-  <div id="ql">
-    <div class="ql-btn" title="Show Desktop">🖥️</div>
-    <div class="ql-btn" title="Internet Explorer">🌐</div>
-    <div class="ql-btn" title="Windows Media Player">🎵</div>
-  </div>
-
-  <!-- Window buttons -->
-  <div id="tb-btns"></div>
-
-  <!-- System Tray -->
-  <div id="systray">
-    <svg class="tray-ico" viewBox="0 0 16 16" title="Volume">
-      <path d="M2 5 L5 5 L9 2 L9 14 L5 11 L2 11 Z" fill="white" opacity=".8"/>
-      <path d="M11 5 Q14 8 11 11" fill="none" stroke="white" stroke-width="1.5" opacity=".8"/>
-    </svg>
-    <svg class="tray-ico" viewBox="0 0 16 16" title="Network">
-      <rect x="1" y="10" width="5" height="4" rx="1" fill="white" opacity=".9"/>
-      <rect x="10" y="10" width="5" height="4" rx="1" fill="white" opacity=".9"/>
-      <rect x="5" y="12" width="6" height="1.5" fill="white" opacity=".7"/>
-      <rect x="5" y="7" width="6" height="1.5" fill="white" opacity=".7"/>
-      <rect x="5" y="5" width="6" height="4" rx="1" fill="white" opacity=".5"/>
-    </svg>
-    <svg class="tray-ico" viewBox="0 0 16 16" title="Security Center">
-      <path d="M8 1 L14 4 L14 9 Q14 13 8 15 Q2 13 2 9 L2 4 Z" fill="#E03535" stroke="white" stroke-width=".8"/>
-      <path d="M5 8 L7 10 L11 6" fill="none" stroke="white" stroke-width="1.5"/>
-    </svg>
-    <div id="tray-clock">12:00 PM</div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     START MENU
-     ══════════════════════════════════════════════ -->
-<div id="start-menu">
-  <div class="sm-hdr">
-    <div class="sm-avatar">👨‍💻</div>
-    <div class="sm-uname">Park Seongho</div>
-  </div>
-  <div class="sm-body">
-    <div class="sm-left">
-      <!-- Pinned -->
-      <div class="sm-item" onclick="openWin('about')">
-        <div class="sm-item-ico">👤</div>
-        <span class="sm-item-lbl">About Me</span>
-      </div>
-      <div class="sm-item" onclick="openWin('contact')">
-        <div class="sm-item-ico">📧</div>
-        <span class="sm-item-lbl">Contact</span>
-      </div>
-      <div class="sm-sep"></div>
-      <!-- Recent -->
-      <div class="sm-item" onclick="openWin('skills')">
-        <div class="sm-item-ico">💻</div>
-        <span class="sm-item-lbl">Technical Skills</span>
-      </div>
-      <div class="sm-item" onclick="openWin('projects')">
-        <div class="sm-item-ico">📁</div>
-        <span class="sm-item-lbl">Projects</span>
-      </div>
-      <div class="sm-item" onclick="openWin('resume')">
-        <div class="sm-item-ico">📄</div>
-        <span class="sm-item-lbl">Resume.pdf</span>
-      </div>
-      <div class="sm-all">
-        <div class="sm-item-ico">📋</div>
-        <span>All Programs</span>
-        <span class="sm-item-arrow">▶</span>
-      </div>
-    </div>
-    <div class="sm-right">
-      <div class="sm-right-item"><div class="sm-right-item-ico">🖥️</div>My Computer</div>
-      <div class="sm-right-item"><div class="sm-right-item-ico">📁</div>My Documents</div>
-      <div class="sm-right-item"><div class="sm-right-item-ico">🖼️</div>My Pictures</div>
-      <div class="sm-right-item"><div class="sm-right-item-ico">🎵</div>My Music</div>
-      <div class="sm-right-sep"></div>
-      <div class="sm-right-item"><div class="sm-right-item-ico">⚙️</div>Control Panel</div>
-      <div class="sm-right-item"><div class="sm-right-item-ico">🖨️</div>Printers</div>
-      <div class="sm-right-sep"></div>
-      <div class="sm-right-item"><div class="sm-right-item-ico">❓</div>Help and Support</div>
-      <div class="sm-right-item"><div class="sm-right-item-ico">🔍</div>Search</div>
-      <div class="sm-right-item"><div class="sm-right-item-ico">▶️</div>Run...</div>
-    </div>
-  </div>
-  <div class="sm-footer">
-    <button class="sm-foot-btn">🔒 Log Off</button>
-    <button class="sm-foot-btn">⏻ Turn Off Computer</button>
-  </div>
-</div>
-
-<!-- Desktop Context Menu -->
-<div class="xp-ctx" id="ctx-desktop">
-  <div class="ctx-item" onclick="arrangeIcons()"><span class="ctx-ico">📐</span>Arrange Icons By</div>
-  <div class="ctx-item"><span class="ctx-ico">🔄</span>Refresh</div>
-  <div class="ctx-sep"></div>
-  <div class="ctx-item"><span class="ctx-ico">📋</span>Paste</div>
-  <div class="ctx-item"><span class="ctx-ico">📋</span>Paste Shortcut</div>
-  <div class="ctx-sep"></div>
-  <div class="ctx-item"><span class="ctx-ico">🆕</span>New ▶</div>
-  <div class="ctx-sep"></div>
-  <div class="ctx-item"><span class="ctx-ico">🎨</span>Properties</div>
-</div>
-
-<!-- Balloon Notification -->
-<div id="balloon">
-  <div class="balloon-title">⚠️ Security Center</div>
-  <div>Your computer might be at risk.<br>
-  <span style="color:#0645AD;cursor:pointer;" onclick="openWin('about')">Click here to learn more.</span></div>
-  <div id="balloon-close" onclick="document.getElementById('balloon').style.display='none'">✕</div>
-</div>
-
-<!-- Tooltip -->
-<div id="tooltip"></div>
-
-<!-- ══════════════════════════════════════════════
-     JAVASCRIPT
-     ══════════════════════════════════════════════ -->
 <script>
-/* ── Cursor ─────────────────────────────────────── */
+/* ══ Cursor ══════════════════════════════════════ */
 const cur = document.getElementById('cursor');
 document.addEventListener('mousemove', e => {
-  cur.style.left = e.clientX + 'px';
-  cur.style.top  = e.clientY + 'px';
+  cur.style.left = (e.clientX - 9) + 'px';
+  cur.style.top  = (e.clientY - 9) + 'px';
   window.parent.postMessage({ type:'mousemove', clientX:e.clientX, clientY:e.clientY }, '*');
 });
-
-/* ── Clock ──────────────────────────────────────── */
-function updateClock() {
-  const n = new Date();
-  const h = n.getHours() % 12 || 12;
-  const m = String(n.getMinutes()).padStart(2,'0');
-  const ap = n.getHours() >= 12 ? 'PM' : 'AM';
-  document.getElementById('tray-clock').innerHTML = `${h}:${m}<br>${ap}`;
-}
-updateClock();
-setInterval(updateClock, 1000);
-
-/* ── Z-index manager ────────────────────────────── */
-let zTop = 200;
-let activeWin = null;
-let minimized = {};
-let maximized = {};
-let prevGeom = {};
-
-function getWin(id) { return document.getElementById('win-' + id); }
-
-function setActive(id) {
-  document.querySelectorAll('.xpwin').forEach(w => w.classList.remove('active'));
-  const w = getWin(id);
-  if (w) {
-    w.classList.add('active');
-    w.style.zIndex = ++zTop;
-    activeWin = id;
-  }
-  refreshTaskbar();
-}
-
-function openWin(id) {
-  const w = getWin(id);
-  if (!w) return;
-  minimized[id] = false;
-  if (w.style.display === 'none' || !w.style.display) {
-    w.style.display = 'block';
-  }
-  setActive(id);
-  // close start menu
-  document.getElementById('start-menu').style.display = 'none';
-  document.getElementById('start-btn').classList.remove('active');
-}
-
-function closeWin(id) {
-  const w = getWin(id);
-  if (!w) return;
-  w.style.display = 'none';
-  minimized[id] = false;
-  if (maximized[id]) maximized[id] = false;
-  if (activeWin === id) activeWin = null;
-  refreshTaskbar();
-}
-
-function minWin(id) {
-  const w = getWin(id);
-  if (!w) return;
-  minimized[id] = true;
-  w.style.display = 'none';
-  if (activeWin === id) activeWin = null;
-  refreshTaskbar();
-}
-
-function maxWin(id) {
-  const w = getWin(id);
-  if (!w) return;
-  if (maximized[id]) {
-    // restore
-    const g = prevGeom[id];
-    if (g) {
-      w.style.left   = g.left;
-      w.style.top    = g.top;
-      w.style.width  = g.width;
-      w.style.height = g.height;
-    }
-    w.classList.remove('maximized');
-    maximized[id] = false;
-  } else {
-    prevGeom[id] = { left:w.style.left, top:w.style.top, width:w.style.width, height:w.style.height };
-    w.style.left   = '0px';
-    w.style.top    = '0px';
-    w.style.width  = '100vw';
-    w.style.height = 'calc(100vh - 30px)';
-    w.classList.add('maximized');
-    maximized[id] = true;
-  }
-  setActive(id);
-}
-
-/* ── Taskbar buttons ────────────────────────────── */
-const WINS = {
-  about:    { label:'About Me',          icon:'👤' },
-  skills:   { label:'Skills.txt',        icon:'💻' },
-  projects: { label:'Projects',          icon:'📁' },
-  contact:  { label:'Contact',           icon:'✉️' },
-  resume:   { label:'Resume.pdf',        icon:'📄' },
-};
-
-function refreshTaskbar() {
-  const bar = document.getElementById('tb-btns');
-  bar.innerHTML = '';
-  document.querySelectorAll('.xpwin').forEach(w => {
-    const id = w.id.replace('win-','');
-    if (!WINS[id]) return;
-    const showing = w.style.display !== 'none';
-    const wasMin   = minimized[id];
-    if (!showing && !wasMin) return;
-    const btn = document.createElement('div');
-    btn.className = 'tb-winbtn' + (activeWin === id && !wasMin ? ' active' : '');
-    btn.innerHTML = `<span style="font-size:13px">${WINS[id].icon}</span><span class="tb-winbtn-txt">${WINS[id].label}</span>`;
-    btn.onclick = () => {
-      if (minimized[id]) {
-        minimized[id] = false;
-        const ww = getWin(id);
-        if (ww) ww.style.display = 'block';
-        setActive(id);
-      } else if (activeWin === id) {
-        minWin(id);
-      } else {
-        setActive(id);
-      }
-    };
-    bar.appendChild(btn);
-  });
-}
-
-/* ── Title bar buttons ──────────────────────────── */
-document.querySelectorAll('.wbtn').forEach(btn => {
-  btn.addEventListener('click', e => {
-    e.stopPropagation();
-    const id = btn.dataset.win;
-    const act = btn.dataset.action;
-    if (act === 'close')    closeWin(id);
-    else if (act === 'min') minWin(id);
-    else if (act === 'max') maxWin(id);
-  });
-});
-
-/* ── Click window to focus ──────────────────────── */
-document.querySelectorAll('.xpwin').forEach(w => {
-  w.addEventListener('mousedown', e => {
-    const id = w.id.replace('win-','');
-    setActive(id);
-  });
-  // Double-click title bar = maximize
-  const tb = w.querySelector('.win-tb');
-  if (tb) {
-    tb.addEventListener('dblclick', e => {
-      if (e.target.classList.contains('wbtn')) return;
-      const id = w.id.replace('win-','');
-      maxWin(id);
-    });
-  }
-});
-
-/* ── Drag windows ───────────────────────────────── */
-let drag = null, dragOff = {x:0,y:0};
-
-document.querySelectorAll('.win-tb').forEach(tb => {
-  tb.addEventListener('mousedown', e => {
-    if (e.target.classList.contains('wbtn')) return;
-    const w = tb.closest('.xpwin');
-    if (w.classList.contains('maximized')) return;
-    drag = w;
-    const r = w.getBoundingClientRect();
-    dragOff.x = e.clientX - r.left;
-    dragOff.y = e.clientY - r.top;
-    e.preventDefault();
-  });
-});
-
-document.addEventListener('mousemove', e => {
-  if (!drag) return;
-  const x = Math.max(0, e.clientX - dragOff.x);
-  const y = Math.max(0, e.clientY - dragOff.y);
-  drag.style.left = x + 'px';
-  drag.style.top  = y + 'px';
-});
-
-document.addEventListener('mouseup', () => { drag = null; });
-
-/* ── Resize windows ─────────────────────────────── */
-let rsz = null, rszType = null, rszStart = {};
-
-document.querySelectorAll('.rh-right, .rh-bottom, .rh-corner').forEach(h => {
-  h.addEventListener('mousedown', e => {
-    e.stopPropagation();
-    rsz = h.closest('.xpwin');
-    rszType = h.classList.contains('rh-corner') ? 'corner'
-            : h.classList.contains('rh-right')  ? 'right' : 'bottom';
-    const r = rsz.getBoundingClientRect();
-    rszStart = { x:e.clientX, y:e.clientY, w:r.width, h:r.height };
-    e.preventDefault();
-  });
-});
-
-document.addEventListener('mousemove', e => {
-  if (!rsz) return;
-  const dx = e.clientX - rszStart.x;
-  const dy = e.clientY - rszStart.y;
-  if (rszType !== 'bottom') rsz.style.width  = Math.max(320, rszStart.w + dx) + 'px';
-  if (rszType !== 'right')  rsz.style.height = Math.max(200, rszStart.h + dy) + 'px';
-});
-
-document.addEventListener('mouseup', () => { rsz = null; });
-
-/* ── Desktop icon selection ─────────────────────── */
-function selIcon(el) {
-  document.querySelectorAll('.dicon').forEach(d => d.classList.remove('sel'));
-  el.classList.add('sel');
-}
-// Deselect on desktop click
-document.getElementById('desktop').addEventListener('click', e => {
-  if (!e.target.closest('.dicon')) {
-    document.querySelectorAll('.dicon').forEach(d => d.classList.remove('sel'));
-  }
-});
-
-/* ── Start Menu ─────────────────────────────────── */
-function toggleStart() {
-  const sm = document.getElementById('start-menu');
-  const sb = document.getElementById('start-btn');
-  const open = sm.style.display === 'block';
-  sm.style.display = open ? 'none' : 'block';
-  sb.classList.toggle('active', !open);
-}
-document.addEventListener('mousedown', e => {
-  const sm = document.getElementById('start-menu');
-  const sb = document.getElementById('start-btn');
-  if (!sb.contains(e.target) && !sm.contains(e.target)) {
-    sm.style.display = 'none';
-    sb.classList.remove('active');
-  }
-});
-// Start menu item clicks (close menu after)
-document.querySelectorAll('.sm-item[onclick], .sm-right-item').forEach(item => {
-  item.addEventListener('click', () => {
-    document.getElementById('start-menu').style.display = 'none';
-    document.getElementById('start-btn').classList.remove('active');
-  });
-});
-
-/* ── Context Menu ───────────────────────────────── */
-const ctxMenu = document.getElementById('ctx-desktop');
-document.getElementById('desktop').addEventListener('contextmenu', e => {
-  e.preventDefault();
-  ctxMenu.style.left    = e.clientX + 'px';
-  ctxMenu.style.top     = Math.min(e.clientY, window.innerHeight - 180) + 'px';
-  ctxMenu.style.display = 'block';
-});
-document.addEventListener('click', () => { ctxMenu.style.display = 'none'; });
-document.addEventListener('contextmenu', e => {
-  if (!e.target.closest('#desktop')) ctxMenu.style.display = 'none';
-});
-
-function arrangeIcons() { ctxMenu.style.display = 'none'; }
-
-/* ── Bubble events to parent ────────────────────── */
 ['mousedown','mouseup'].forEach(t => {
   document.addEventListener(t, e => {
     window.parent.postMessage({ type:t, clientX:e.clientX, clientY:e.clientY }, '*');
@@ -1521,17 +429,605 @@ function arrangeIcons() { ctxMenu.style.display = 'none'; }
   });
 });
 
-/* ── Init ───────────────────────────────────────── */
-setTimeout(() => {
-  openWin('about');
-  refreshTaskbar();
-}, 400);
+/* ══ Status Bar Clock ════════════════════════════ */
+function updateClock() {
+  const n = new Date();
+  document.getElementById('sb-clock').textContent =
+    String(n.getHours()).padStart(2,'0')+':'+
+    String(n.getMinutes()).padStart(2,'0')+':'+
+    String(n.getSeconds()).padStart(2,'0');
+}
+updateClock(); setInterval(updateClock, 1000);
 
-// Balloon tip after 2.5s
+/* Session timer */
+let sessionSec = 0;
+setInterval(() => {
+  sessionSec++;
+  const h = Math.floor(sessionSec/3600), m = Math.floor((sessionSec%3600)/60), s = sessionSec%60;
+  document.getElementById('sb-session').textContent =
+    String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}, 1000);
+
+/* ══ Boot Sequence ═══════════════════════════════ */
+const BOOT_LINES = [
+  { txt: 'BIOS v2.1.0  AI-SEC Systems, Inc.', delay:0 },
+  { txt: 'CPU: Intel Xeon W9-3595X @ 5.0GHz  [64 cores]  RAM: 128GB DDR5', delay:200 },
+  { txt: 'Detecting storage devices...', delay:400 },
+  { txt: '  /dev/nvme0n1  2.0TB  [OK]', delay:600, cls:'boot-ok' },
+  { txt: 'Loading kernel modules...', delay:850 },
+  { txt: '  [    0.000000] Initializing cgroup subsys cpuset', delay:1000, cls:'boot-ok' },
+  { txt: '  [    0.001248] Kernel command line: BOOT_IMAGE=/vmlinuz-5.15.0-aisec', delay:1100 },
+  { txt: '  [    0.234891] ai_sec_kmod: AI Security Kernel Module loaded', delay:1200, cls:'boot-ok' },
+  { txt: 'Loading security protocols...                              [ OK ]', delay:1400, cls:'boot-ok' },
+  { txt: 'Starting AI Threat Detection Engine...                    [ OK ]', delay:1550, cls:'boot-ok' },
+  { txt: 'Initializing ML model runtime (PyTorch 2.1.0)...          [ OK ]', delay:1700, cls:'boot-ok' },
+  { txt: 'Establishing encrypted tunnel (AES-256-GCM)...            [ OK ]', delay:1850, cls:'boot-ok' },
+  { txt: 'Loading IDS rules (24,891 signatures)...                  [ OK ]', delay:2000, cls:'boot-ok' },
+  { txt: 'Connecting to Threat Intelligence feed...                 [ OK ]', delay:2150, cls:'boot-ok' },
+  { txt: '', delay:2350 },
+  { txt: '  ╔════════════════════════════════════════════════════════╗', delay:2400 },
+  { txt: '  ║   AI-SEC WORKSTATION v2.1  ·  AUTHORIZED ACCESS ONLY  ║', delay:2450 },
+  { txt: '  ║   All activities are monitored and logged.             ║', delay:2500 },
+  { txt: '  ╚════════════════════════════════════════════════════════╝', delay:2550 },
+  { txt: '', delay:2650 },
+  { txt: 'System ready. Type "help" for available commands.', delay:2700, cls:'boot-ok' },
+];
+
+const bootEl = document.getElementById('boot-text');
+let bootDone = false;
+
+BOOT_LINES.forEach(line => {
+  setTimeout(() => {
+    const span = document.createElement('span');
+    if (line.cls) span.className = line.cls;
+    span.textContent = (line.txt || '') + '\n';
+    bootEl.appendChild(span);
+  }, line.delay);
+});
+
 setTimeout(() => {
-  document.getElementById('balloon').style.display = 'block';
-  setTimeout(() => { document.getElementById('balloon').style.display = 'none'; }, 6000);
-}, 2500);
+  const boot = document.getElementById('boot');
+  boot.style.opacity = '0';
+  setTimeout(() => {
+    boot.style.display = 'none';
+    bootDone = true;
+    startTerminal();
+  }, 800);
+}, 3200);
+
+/* ══ Terminal Engine ═════════════════════════════ */
+const output = document.getElementById('term-output');
+const typedEl = document.getElementById('term-typed');
+let inputBuffer = '';
+let cmdHistory = [];
+let histIdx = -1;
+
+function addLine(html, cls) {
+  const div = document.createElement('div');
+  div.className = 'term-line' + (cls ? ' '+cls : '');
+  div.innerHTML = html;
+  output.appendChild(div);
+  output.scrollTop = output.scrollHeight;
+}
+
+function addEmpty() {
+  const div = document.createElement('div');
+  div.className = 'term-empty';
+  output.appendChild(div);
+}
+
+function echoCmd(cmd) {
+  addLine('<span style="color:var(--cyan)">root@ai-sec:~$</span> <span style="color:var(--green)">' + escHtml(cmd) + '</span>');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function bar(pct, cls) {
+  const filled = Math.round(pct / 5);
+  const empty  = 20 - filled;
+  return '<span class="' + (cls||'t-green') + '">' +
+    '█'.repeat(filled) + '░'.repeat(empty) + '</span> ' +
+    '<span class="t-yellow">' + pct + '%</span>';
+}
+
+/* ── Commands ──────────────────────────────────── */
+const CMDS = {
+
+help() {
+  addEmpty();
+  addLine('<span class="t-cyan">╔══ AVAILABLE COMMANDS ═══════════════════════════════════════╗</span>');
+  const cmds = [
+    ['whoami / about', 'Identity & profile'],
+    ['skills',         'Technical skills & expertise'],
+    ['projects',       'Featured security projects'],
+    ['contact',        'Contact information'],
+    ['resume',         'View resume / CV'],
+    ['experience',     'Work experience'],
+    ['nmap',           'Run network discovery scan'],
+    ['status',         'System & security overview'],
+    ['ls',             'List available files'],
+    ['clear',          'Clear terminal screen'],
+    ['history',        'Command history'],
+    ['sudo [cmd]',     'Privilege escalation (try it)'],
+    ['hack',           'Initiate hacking sequence'],
+  ];
+  cmds.forEach(([c,d]) => {
+    addLine('<span class="t-cyan">║</span>  <span class="t-bright">' +
+      c.padEnd(22) + '</span><span class="t-dim">' + d + '</span>');
+  });
+  addLine('<span class="t-cyan">╚══════════════════════════════════════════════════════════════╝</span>');
+  addEmpty();
+},
+
+whoami() { CMDS.about(); },
+
+about() {
+  addEmpty();
+  addLine('<span class="t-cyan">┌─ IDENTITY PROFILE ─────────────────────────────────────────┐</span>');
+  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Name     </span> <span class="t-bright">Park Seongho  (박성호)</span>');
+  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Role     </span> <span class="t-green">AI Security Solutions Developer</span>');
+  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Status   </span> <span class="t-bright">●</span> <span style="color:#33ff88;">AVAILABLE FOR OPPORTUNITIES</span>');
+  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Location </span> <span class="t-white">Seoul, South Korea  ·  Remote OK</span>');
+  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Email    </span> <span class="t-cyan">psh243360@gmail.com</span>');
+  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Focus    </span> <span class="t-white">AI/ML Security  ·  Adversarial ML  ·  AI Red-teaming</span>');
+  addLine('<span class="t-cyan">└────────────────────────────────────────────────────────────┘</span>');
+  addEmpty();
+  addLine('<span class="t-white">Passionate about identifying and mitigating vulnerabilities in</span>');
+  addLine('<span class="t-white">AI and machine learning systems. Specialized in adversarial</span>');
+  addLine('<span class="t-white">attacks, model robustness, and building security frameworks</span>');
+  addLine('<span class="t-white">for AI-powered systems in production environments.</span>');
+  addEmpty();
+},
+
+skills() {
+  addEmpty();
+  addLine('<span class="t-cyan">══ AI / ML SECURITY ═══════════════════════════════════════</span>');
+  [
+    ['Adversarial Machine Learning',  92],
+    ['AI Red-Teaming & Auditing',      90],
+    ['Data Poisoning Detection',       87],
+    ['Model Robustness Testing',       84],
+    ['LLM Security & Prompt Injection',88],
+    ['Secure ML Pipeline Design',      80],
+  ].forEach(([n,p])=>{
+    addLine('  <span class="t-white">' + n.padEnd(36) + '</span>' + bar(p,'t-green'));
+  });
+  addEmpty();
+  addLine('<span class="t-cyan">══ CYBERSECURITY ══════════════════════════════════════════</span>');
+  [
+    ['Penetration Testing',   83],
+    ['Vulnerability Research',88],
+    ['Network Security',      78],
+    ['Security Architecture', 75],
+    ['Threat Modeling',       85],
+    ['Incident Response',     72],
+  ].forEach(([n,p])=>{
+    addLine('  <span class="t-white">' + n.padEnd(36) + '</span>' + bar(p,'t-cyan'));
+  });
+  addEmpty();
+  addLine('<span class="t-cyan">══ TOOLS & FRAMEWORKS ═════════════════════════════════════</span>');
+  addLine('  <span class="t-yellow">Languages </span><span class="t-white">Python  C++  Go  Bash  Rust</span>');
+  addLine('  <span class="t-yellow">ML/AI     </span><span class="t-white">PyTorch  TensorFlow  Hugging Face  ONNX</span>');
+  addLine('  <span class="t-yellow">Security  </span><span class="t-white">Metasploit  Burp Suite  Wireshark  Nmap</span>');
+  addLine('  <span class="t-yellow">AI Sec    </span><span class="t-white">Foolbox  ART  CleverHans  TextAttack</span>');
+  addLine('  <span class="t-yellow">Cloud     </span><span class="t-white">AWS  GCP  Azure  Kubernetes  Docker</span>');
+  addEmpty();
+},
+
+projects() {
+  addEmpty();
+  addLine('<span class="t-cyan">══ FEATURED PROJECTS ══════════════════════════════════════</span>');
+  addEmpty();
+  const projs = [
+    {
+      n:'[01] Adversarial ML Defense Framework',
+      t:'AI Security',
+      d:'Comprehensive framework for testing and hardening ML models against adversarial\n      attacks. Implements PGD, FGSM, CW attacks and corresponding defenses.\n      Deployed in 3 production AI systems.',
+      s:'Python · PyTorch · Foolbox · Docker',
+      m:'★ 847 forks on GitHub'
+    },
+    {
+      n:'[02] LLM Prompt Injection Scanner',
+      t:'LLM Security',
+      d:'Automated scanner for detecting prompt injection vulnerabilities in LLM-powered\n      applications. Covers 120+ attack patterns including jailbreaks and data\n      exfiltration vectors.',
+      s:'Python · Hugging Face · FastAPI',
+      m:'Used by 15+ security teams'
+    },
+    {
+      n:'[03] AI-Powered Intrusion Detection',
+      t:'ML + Network Security',
+      d:'Real-time IDS using ensemble ML models (isolation forest + autoencoder +\n      random forest). Achieves 99.2% detection rate with <0.1% false positives\n      on NSL-KDD and CICIDS2017 datasets.',
+      s:'Python · Scikit-learn · Kafka · Elasticsearch',
+      m:'99.2% detection accuracy'
+    },
+    {
+      n:'[04] Data Poisoning Detection Toolkit',
+      t:'AI Security Research',
+      d:'Detection toolkit for training-time attacks on ML models. Implements\n      activation clustering, spectral signatures, and gradient-based detection\n      methods. Published in IEEE S&P 2024.',
+      s:'Python · TensorFlow · NumPy',
+      m:'IEEE S&P 2024 Publication'
+    },
+  ];
+  projs.forEach(p => {
+    addLine('<span class="t-bright">' + p.n + '</span>  <span class="t-dim">[' + p.t + ']</span>');
+    addLine('  <span class="t-white">' + p.d + '</span>');
+    addLine('  <span class="t-yellow">Stack  </span><span class="t-dim">' + p.s + '</span>');
+    addLine('  <span class="t-cyan">→ ' + p.m + '</span>');
+    addEmpty();
+  });
+},
+
+contact() {
+  addEmpty();
+  addLine('<span class="t-cyan">══ CONTACT ════════════════════════════════════════════════</span>');
+  addEmpty();
+  addLine('  <span class="t-dim">Email     </span> <span class="t-cyan">psh243360@gmail.com</span>');
+  addLine('  <span class="t-dim">GitHub    </span> <span class="t-cyan">github.com/Park-Seongho</span>');
+  addLine('  <span class="t-dim">LinkedIn  </span> <span class="t-cyan">linkedin.com/in/parkseongho</span>');
+  addLine('  <span class="t-dim">Location  </span> <span class="t-white">Seoul, South Korea</span>');
+  addEmpty();
+  addLine('  <span style="color:#33ff88;">● OPEN TO</span>  <span class="t-white">Full-time · Contract · Research Collaboration</span>');
+  addLine('  <span class="t-dim">          Remote available worldwide</span>');
+  addEmpty();
+},
+
+resume() {
+  addEmpty();
+  addLine('<span class="t-cyan">══ RESUME — PARK SEONGHO ══════════════════════════════════</span>');
+  addEmpty();
+  addLine('<span class="t-bright">EDUCATION</span>');
+  addLine('  <span class="t-white">B.S. Computer Science & Security Engineering</span>');
+  addLine('  <span class="t-dim">Focus: AI Systems · Cybersecurity · Machine Learning</span>');
+  addEmpty();
+  addLine('<span class="t-bright">CERTIFICATIONS</span>');
+  ['AI/ML Security Specialist (AMSS)', 'Certified Ethical Hacker (CEH)', 'AWS Certified Security — Specialty', 'Google Professional Cloud Security Engineer'].forEach(c => {
+    addLine('  <span class="t-cyan">▸</span> <span class="t-white">' + c + '</span>');
+  });
+  addEmpty();
+  addLine('<span class="t-bright">KEY SKILLS</span>');
+  addLine('  <span class="t-white">Python · C++ · PyTorch · TensorFlow · Kubernetes · Docker</span>');
+  addLine('  <span class="t-white">Adversarial ML · Pen Testing · SIEM · IDS/IPS · AWS · GCP</span>');
+  addEmpty();
+  addLine('<span class="t-bright">PUBLICATIONS</span>');
+  addLine('  <span class="t-cyan">▸</span> <span class="t-white">"Data Poisoning Defense for ML Pipelines" — IEEE S&P 2024</span>');
+  addLine('  <span class="t-cyan">▸</span> <span class="t-white">"Adversarial Robustness in LLMs" — arXiv:2024.xxxxx</span>');
+  addEmpty();
+  addLine('  <span class="t-dim">[ Type "contact" to get in touch ]</span>');
+  addEmpty();
+},
+
+experience() {
+  addEmpty();
+  addLine('<span class="t-cyan">══ WORK EXPERIENCE ════════════════════════════════════════</span>');
+  addEmpty();
+  const exp = [
+    { role:'AI Security Solutions Developer', co:'Security Research Lab', period:'2023 – Present',
+      items:['Developing adversarial ML defense frameworks deployed in production', 'Leading AI red-team exercises for enterprise clients', 'Building automated LLM security audit pipelines'] },
+    { role:'Security Researcher (Intern)', co:'Cybersecurity Institute', period:'2022 – 2023',
+      items:['Vulnerability research on ML-based anomaly detection systems', 'Contributed to open-source adversarial attack toolkits', 'Published 2 peer-reviewed papers on AI security'] },
+  ];
+  exp.forEach(e => {
+    addLine('<span class="t-bright">' + e.role + '</span>');
+    addLine('  <span class="t-cyan">' + e.co + '</span>  <span class="t-dim">' + e.period + '</span>');
+    e.items.forEach(i => addLine('  <span class="t-cyan">·</span> <span class="t-white">' + i + '</span>'));
+    addEmpty();
+  });
+},
+
+status() {
+  addEmpty();
+  addLine('<span class="t-cyan">══ SYSTEM & SECURITY STATUS ═══════════════════════════════</span>');
+  addEmpty();
+  addLine('  <span class="t-dim">Hostname    </span><span class="t-green">ai-sec-ws-01</span>');
+  addLine('  <span class="t-dim">OS          </span><span class="t-white">Ubuntu 22.04 LTS (AI-SEC Edition)</span>');
+  addLine('  <span class="t-dim">Kernel      </span><span class="t-white">5.15.0-aisec-hardened</span>');
+  addLine('  <span class="t-dim">Uptime      </span><span class="t-white">847 days, 12 hours, 33 minutes</span>');
+  addLine('  <span class="t-dim">User        </span><span class="t-cyan">root (Park Seongho)</span>');
+  addEmpty();
+  addLine('  <span class="t-dim">Threat Level </span><span class="t-green">LOW  ●</span>');
+  addLine('  <span class="t-dim">Firewall     </span><span class="t-cyan">ACTIVE (nftables)</span>');
+  addLine('  <span class="t-dim">IDS/IPS      </span><span class="t-cyan">ACTIVE (Suricata 6.0.12)</span>');
+  addLine('  <span class="t-dim">Encryption   </span><span class="t-cyan">AES-256-GCM / TLS 1.3</span>');
+  addLine('  <span class="t-dim">SELinux      </span><span class="t-cyan">ENFORCING</span>');
+  addEmpty();
+  addLine('  <span class="t-dim">AI Models    </span><span class="t-green">4 running  /  1 idle</span>');
+  addLine('  <span class="t-dim">Detections   </span><span class="t-yellow">47 blocked today  /  0 critical</span>');
+  addEmpty();
+},
+
+ls() {
+  addEmpty();
+  addLine('<span class="t-dim">total 48</span>');
+  const files = [
+    { p:'drwxr-xr-x', n:'projects/',   c:'t-yellow' },
+    { p:'drwxr-xr-x', n:'models/',     c:'t-yellow' },
+    { p:'-rw-r--r--', n:'about.txt',   c:'t-white' },
+    { p:'-rw-r--r--', n:'skills.txt',  c:'t-white' },
+    { p:'-rw-r--r--', n:'contact.txt', c:'t-white' },
+    { p:'-rwxr-xr-x', n:'resume.pdf',  c:'t-cyan' },
+    { p:'-rw-------', n:'id_rsa',      c:'t-red' },
+    { p:'-rw-r--r--', n:'.bashrc',     c:'t-dim' },
+  ];
+  files.forEach(f => {
+    addLine(f.p + '  root  root  <span class="' + f.c + '">' + f.n + '</span>');
+  });
+  addEmpty();
+  addLine('<span class="t-dim">[ Try: cat about.txt · cat skills.txt · cat contact.txt ]</span>');
+  addEmpty();
+},
+
+clear() {
+  output.innerHTML = '';
+},
+
+history() {
+  addEmpty();
+  if (cmdHistory.length === 0) {
+    addLine('<span class="t-dim">No commands in history.</span>');
+  } else {
+    cmdHistory.forEach((c,i) => {
+      addLine('  <span class="t-dim">' + String(i+1).padStart(4) + '</span>  <span class="t-white">' + escHtml(c) + '</span>');
+    });
+  }
+  addEmpty();
+},
+
+nmap() {
+  addEmpty();
+  addLine('<span class="t-cyan">Starting Nmap 7.94 ( https://nmap.org )</span>');
+  addLine('<span class="t-dim">Scanning local network 192.168.0.0/24 ...</span>');
+  setTimeout(()=>{
+    addEmpty();
+    addLine('Nmap scan report for <span class="t-cyan">ai-sec-gateway.local (192.168.0.1)</span>');
+    addLine('<span class="t-dim">Host is up (0.0014s latency).</span>');
+    addEmpty();
+    addLine('<span class="t-yellow">PORT      STATE  SERVICE      VERSION</span>');
+    [['22/tcp','open','ssh','OpenSSH 9.3p1'],
+     ['80/tcp','open','http','nginx 1.25.3'],
+     ['443/tcp','open','https','nginx 1.25.3 (TLS 1.3)'],
+     ['8443/tcp','open','ai-api','FastAPI 0.104'],
+     ['9090/tcp','open','prometheus','Prometheus 2.47'],
+    ].forEach(([p,s,sv,v])=>{
+      addLine(p.padEnd(10) + '<span class="t-green">' + s + '</span>   ' + sv.padEnd(14) + '<span class="t-dim">' + v + '</span>');
+    });
+    addEmpty();
+    addLine('<span class="t-green">AI-SEC Scanner: No critical vulnerabilities detected.</span>');
+    addLine('<span class="t-dim">Nmap done: 1 IP address (1 host up) scanned in 4.23 seconds</span>');
+    addEmpty();
+  }, 1200);
+},
+
+hack() {
+  addEmpty();
+  addLine('<span class="t-yellow">Initializing breach sequence...</span>');
+  let frames = ['[▓░░░░░░░░░]  10%','[▓▓▓░░░░░░░]  30%','[▓▓▓▓▓░░░░░]  50%','[▓▓▓▓▓▓▓░░░]  70%','[▓▓▓▓▓▓▓▓▓░]  90%'];
+  let i = 0;
+  const iv = setInterval(()=>{
+    if(i < frames.length){
+      addLine('<span class="t-green">' + frames[i] + '</span>');
+      i++;
+    } else {
+      clearInterval(iv);
+      addEmpty();
+      addLine('<span class="t-red">ACCESS DENIED</span>  <span class="t-dim">— just kidding. You\'re already in.</span>');
+      addLine('<span class="t-dim">Hack what? You\'re the AI Security Engineer here.</span>');
+      addEmpty();
+    }
+  }, 280);
+},
+
+sudo(args) {
+  addEmpty();
+  if (!args || args === 'su' || args === '-i') {
+    addLine('<span class="t-yellow">[sudo] password for park:</span>');
+    setTimeout(()=>{
+      addLine('<span class="t-red">Sorry, user park is not in the sudoers file. This incident will be reported.</span>');
+      addEmpty();
+    }, 800);
+  } else if (args === 'rm -rf /') {
+    addLine('<span class="t-red">Permission denied.</span>');
+    addLine('<span class="t-dim">Nice try. SELinux blocked that in 0.001ms.</span>');
+    addEmpty();
+  } else {
+    addLine('<span class="t-yellow">[sudo] password for park:</span>');
+    setTimeout(()=>{
+      addLine('<span class="t-dim">Command executed with elevated privileges.</span>');
+      addEmpty();
+    }, 800);
+  }
+},
+
+cat(args) {
+  if (!args) { addLine('<span class="t-red">usage: cat &lt;file&gt;</span>'); return; }
+  const a = args.toLowerCase().replace(/['"]/g,'');
+  if (a.includes('about'))   { CMDS.about(); }
+  else if (a.includes('skill'))  { CMDS.skills(); }
+  else if (a.includes('contact')){ CMDS.contact(); }
+  else if (a.includes('resume') || a.includes('pdf')){ CMDS.resume(); }
+  else if (a.includes('id_rsa') || a.includes('secret') || a.includes('passwd')) {
+    addLine('<span class="t-red">Permission denied: classified file</span>');
+    addLine('<span class="t-dim">Nice try though.</span>');
+    addEmpty();
+  }
+  else { addLine('<span class="t-red">cat: ' + escHtml(args) + ': No such file or directory</span>'); addEmpty(); }
+},
+
+};
+
+/* ── Execute Command ───────────────────────────── */
+function execCmd(raw) {
+  const str = raw.trim();
+  if (!str) return;
+  cmdHistory.unshift(str);
+  if (cmdHistory.length > 50) cmdHistory.pop();
+  histIdx = -1;
+
+  echoCmd(str);
+  const parts = str.split(/\s+/);
+  const cmd   = parts[0].toLowerCase();
+  const args  = parts.slice(1).join(' ');
+
+  if (CMDS[cmd]) {
+    CMDS[cmd](args);
+  } else if (cmd === 'exit' || cmd === 'logout') {
+    addLine('<span class="t-dim">logout: Session ended. Reconnecting...</span>');
+    addEmpty();
+    setTimeout(() => location.reload(), 1500);
+  } else if (cmd === 'pwd') {
+    addLine('/root'); addEmpty();
+  } else if (cmd === 'date') {
+    addLine(new Date().toString()); addEmpty();
+  } else if (cmd === 'echo') {
+    addLine('<span class="t-white">' + escHtml(args) + '</span>'); addEmpty();
+  } else if (cmd === 'uname') {
+    addLine('Linux ai-sec-ws-01 5.15.0-aisec #1 SMP x86_64 GNU/Linux'); addEmpty();
+  } else {
+    addLine('<span class="t-red">bash: ' + escHtml(cmd) + ': command not found</span>');
+    addLine('<span class="t-dim">Type "help" for available commands.</span>');
+    addEmpty();
+  }
+}
+
+/* ── Keyboard Handler ──────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (!bootDone) return;
+  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+    inputBuffer += e.key;
+    typedEl.textContent = inputBuffer;
+  } else if (e.key === 'Backspace') {
+    inputBuffer = inputBuffer.slice(0,-1);
+    typedEl.textContent = inputBuffer;
+  } else if (e.key === 'Enter') {
+    execCmd(inputBuffer);
+    inputBuffer = '';
+    typedEl.textContent = '';
+  } else if (e.key === 'ArrowUp') {
+    if (histIdx < cmdHistory.length - 1) {
+      histIdx++;
+      inputBuffer = cmdHistory[histIdx];
+      typedEl.textContent = inputBuffer;
+    }
+  } else if (e.key === 'ArrowDown') {
+    if (histIdx > 0) {
+      histIdx--;
+      inputBuffer = cmdHistory[histIdx];
+      typedEl.textContent = inputBuffer;
+    } else {
+      histIdx = -1; inputBuffer = '';
+      typedEl.textContent = '';
+    }
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    const cmds = Object.keys(CMDS);
+    const match = cmds.find(c => c.startsWith(inputBuffer));
+    if (match) { inputBuffer = match; typedEl.textContent = inputBuffer; }
+  } else if (e.key === 'l' && e.ctrlKey) {
+    CMDS.clear();
+  }
+});
+
+/* ── Start Terminal (after boot) ───────────────── */
+function startTerminal() {
+  // Welcome banner
+  addLine('<span class="t-bright">  ██████╗ ███████╗ ██████╗     ███████╗███████╗ ██████╗</span>');
+  addLine('<span class="t-bright">  ██╔══██╗██╔════╝██╔════╝     ██╔════╝██╔════╝██╔════╝</span>');
+  addLine('<span class="t-green">  ███████║███████╗██║          ███████╗█████╗  ██║     </span>');
+  addLine('<span class="t-green">  ██╔══██║╚════██║██║          ╚════██║██╔══╝  ██║     </span>');
+  addLine('<span class="t-dim">  ██║  ██║███████║╚██████╗     ███████║███████╗╚██████╗</span>');
+  addLine('<span class="t-dim">  ╚═╝  ╚═╝╚══════╝ ╚═════╝     ╚══════╝╚══════╝ ╚═════╝</span>');
+  addEmpty();
+  addLine('<span class="t-cyan">  AI Security Solutions Developer  ·  Park Seongho (박성호)</span>');
+  addLine('<span class="t-dim">  ──────────────────────────────────────────────────────────</span>');
+  addLine('<span class="t-dim">  Type </span><span class="t-yellow">help</span><span class="t-dim"> for available commands  ·  Tab for autocomplete  ·  ↑↓ for history</span>');
+  addEmpty();
+  // Auto-run whoami after 0.5s
+  setTimeout(() => {
+    addLine('<span class="t-cyan">root@ai-sec:~$</span> <span class="t-green">whoami</span>');
+    CMDS.about();
+  }, 500);
+}
+
+/* ══ Dashboard Live Updates ══════════════════════ */
+function randBetween(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+
+function updateDash() {
+  // CPU
+  const cpu = randBetween(28, 78);
+  document.getElementById('d-cpu').style.width = cpu + '%';
+  document.getElementById('d-cpu-t').textContent = cpu + '%';
+  // RAM
+  const ram = randBetween(55, 80);
+  document.getElementById('d-ram').style.width = ram + '%';
+  document.getElementById('d-ram-t').textContent = ram + '%';
+  // NET
+  const net = randBetween(10, 55);
+  document.getElementById('d-net').style.width = net + '%';
+  document.getElementById('d-net-t').textContent = net + '%';
+  // Blocked counter
+  const blk = parseInt(document.getElementById('d-blocked').textContent) + (Math.random() > 0.7 ? 1 : 0);
+  document.getElementById('d-blocked').textContent = blk;
+  // Scan ago
+  const secs = randBetween(10, 180);
+  document.getElementById('d-scan-ago').textContent = secs < 60 ? secs + 's ago' : Math.floor(secs/60) + 'm ago';
+  // Network bytes
+  const bw = (Math.random() * 5 + 0.5).toFixed(1);
+  document.getElementById('conn-bytes').textContent = bw + ' MB/s';
+}
+setInterval(updateDash, 3000);
+
+/* ══ Log Feed ════════════════════════════════════ */
+const LOG_POOL = [
+  {c:'log-info', t:'[INFO] TLS handshake completed: 10.0.0.34:443'},
+  {c:'log-ok',   t:'[OK  ] adversarial_det_v4: inference 2.1ms'},
+  {c:'log-warn', t:'[WARN] Anomalous request pattern: /api/v1/predict (score: 0.73)'},
+  {c:'log-info', t:'[INFO] IDS rule updated: ET-POLICY-20241'},
+  {c:'log-ok',   t:'[OK  ] Signature DB sync: +12 new IOCs'},
+  {c:'log-warn', t:'[WARN] Rate limit applied: 192.168.1.200 (142 req/s)'},
+  {c:'log-info', t:'[INFO] ML model heartbeat: all 4 models healthy'},
+  {c:'log-err',  t:'[ERR ] Blocked SQL injection: 45.33.32.156 → /api/login'},
+  {c:'log-ai',   t:'[AI  ] Adversarial input detected — confidence 98.7%'},
+  {c:'log-ok',   t:'[OK  ] Certificate renewed: *.aisec.local (365d)'},
+  {c:'log-info', t:'[INFO] Threat intel sync: +247 IOCs processed'},
+  {c:'log-warn', t:'[WARN] Unusual entropy in input vector #8847'},
+  {c:'log-ai',   t:'[AI  ] LLM guard: prompt injection attempt blocked'},
+  {c:'log-ok',   t:'[OK  ] CVE-2024-1234 patched: kernel update applied'},
+  {c:'log-info', t:'[INFO] SSH login: root@10.0.0.12 (key auth)'},
+  {c:'log-err',  t:'[ERR ] Blocked: XSS attempt from 104.21.14.88'},
+  {c:'log-ai',   t:'[AI  ] Anomaly score: 0.12 (normal baseline)'},
+  {c:'log-info', t:'[INFO] Backup completed: /var/models → S3 (2.3GB)'},
+  {c:'log-ok',   t:'[OK  ] Security audit passed: 247/247 checks'},
+  {c:'log-warn', t:'[WARN] High memory pressure: adversarial_det_v4 (4.2GB)'},
+];
+const logFeed = document.getElementById('log-feed');
+let logIdx = 0;
+
+function addLog() {
+  const entry = LOG_POOL[logIdx % LOG_POOL.length];
+  logIdx++;
+  const d = document.createElement('div');
+  d.className = 'log-entry ' + entry.c;
+  const now = new Date();
+  const ts = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  d.textContent = ts + ' ' + entry.t;
+  logFeed.appendChild(d);
+  // Keep only last 40 entries
+  while (logFeed.children.length > 40) logFeed.removeChild(logFeed.firstChild);
+  logFeed.scrollTop = logFeed.scrollHeight;
+}
+
+// Seed initial logs
+for (let i = 0; i < 12; i++) addLog();
+setInterval(addLog, randBetween(1500, 4000));
+
+/* ══ Occasional Glitch Effect ════════════════════ */
+setInterval(() => {
+  if (Math.random() > 0.85) {
+    document.body.classList.add('glitch');
+    setTimeout(() => document.body.classList.remove('glitch'), 150);
+  }
+}, 8000);
 
 </script>
 </body>
