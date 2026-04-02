@@ -3,1032 +3,676 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1024">
-<title>AI-SEC Terminal</title>
+<title>Portfolio Terminal</title>
 <style>
-:root {
-  --green:       #33ff33;
-  --green-dim:   #1a8f1a;
-  --green-dark:  #0d4d0d;
-  --green-glow:  #00ff41;
-  --cyan:        #00ffcc;
-  --cyan-dim:    #00aa88;
-  --yellow:      #ffcc00;
-  --orange:      #ff8800;
-  --red:         #ff4444;
-  --blue:        #4488ff;
-  --purple:      #aa44ff;
-  --bg:          #050905;
-  --bg2:         #070c07;
-  --bg3:         #060a10;
-  --border:      #144414;
-  --border2:     #0d2a1a;
-  --text:        #22cc22;
-  --text-dim:    #157015;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;}
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
 
 body {
-  background: var(--bg);
-  color: var(--green);
-  font-family: 'Courier New', Consolas, 'Lucida Console', monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  overflow: hidden;
-  width: 100vw;
-  height: 100vh;
+  background: #000;
+  color: #f2f2f2;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.55;
   cursor: none;
-  user-select: none;
 }
 
-/* CRT scanlines */
-body::after {
-  content:'';
-  position:fixed;inset:0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,transparent 2px,
-    rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 3px
-  );
-  pointer-events:none;
-  z-index:9990;
-}
-/* Vignette */
-body::before {
-  content:'';
-  position:fixed;inset:0;
-  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
-  pointer-events:none;
-  z-index:9989;
-}
-
-/* ── Cursor ─────────────────────────────────── */
 #cursor {
-  position:fixed;width:18px;height:18px;pointer-events:none;
-  z-index:99999;top:0;left:0;
-  filter: drop-shadow(0 0 4px var(--green-glow));
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  z-index: 1000;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
 }
 
-/* ── Boot Screen ────────────────────────────── */
-#boot {
-  position:fixed;inset:0;background:#000;
-  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
-  padding:40px 60px;z-index:9800;
-  font-family:'Courier New',monospace;font-size:13px;
-  color:#22cc22;
-  transition: opacity 0.8s;
-}
-#boot-text { white-space:pre;line-height:1.8; }
-.boot-ok   { color:#33ff33; }
-.boot-warn { color:#ffcc00; }
-.boot-err  { color:#ff4444; }
-
-/* ── Status Bar ─────────────────────────────── */
-#statusbar {
-  height:26px;
-  background: linear-gradient(to bottom, #0a1a0a, #060e06);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;
-  padding:0 14px;gap:0;
-  font-size:11px;color:var(--text-dim);
-  flex-shrink:0;
-}
-.sb-item {
-  padding:0 12px;border-right:1px solid var(--border);
-  display:flex;align-items:center;gap:5px;height:100%;white-space:nowrap;
-}
-.sb-item:last-child{border-right:none;margin-left:auto;}
-.sb-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
-.dot-green  { background:var(--green-glow);box-shadow:0 0 6px var(--green-glow); }
-.dot-yellow { background:var(--yellow);box-shadow:0 0 6px var(--yellow); }
-.dot-red    { background:var(--red);box-shadow:0 0 6px var(--red); }
-.sb-bright  { color:var(--green);font-weight:bold; }
-
-/* ── Main Layout ────────────────────────────── */
-#main {
-  display:flex;
-  height:calc(100vh - 26px);
-  overflow:hidden;
+#terminal {
+  width: 100%;
+  height: 100%;
+  padding: 18px 20px;
 }
 
-/* ── Terminal Panel (Left) ──────────────────── */
-#term-panel {
-  flex:1;min-width:0;
-  display:flex;flex-direction:column;
-  border-right:1px solid var(--border);
-  background:var(--bg2);
+#output {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-#term-header {
-  height:22px;background:#040904;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 10px;gap:8px;
-  font-size:10px;color:var(--text-dim);flex-shrink:0;
-}
-.term-dot{width:9px;height:9px;border-radius:50%;}
-.td-red{background:#ff5f56;} .td-yellow{background:#ffbd2e;} .td-green{background:#27c93f;}
-
-#term-output {
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:10px 14px;
-  scroll-behavior:smooth;
-}
-#term-output::-webkit-scrollbar{width:6px;}
-#term-output::-webkit-scrollbar-track{background:#040904;}
-#term-output::-webkit-scrollbar-thumb{background:var(--green-dark);border-radius:3px;}
-
-/* Input bar */
-#term-input-row {
-  height:28px;flex-shrink:0;
-  border-top:1px solid var(--border);
-  background:#040904;
-  display:flex;align-items:center;padding:0 14px;gap:6px;
-}
-#term-prompt-label { color:var(--cyan);white-space:nowrap;font-size:12px; }
-#term-input-display {
-  flex:1;color:var(--green);font-size:12px;font-family:inherit;
-  white-space:nowrap;overflow:hidden;
-}
-.cursor-block {
-  display:inline-block;width:8px;height:13px;
-  background:var(--green-glow);vertical-align:text-bottom;
-  animation:blink 1s step-end infinite;
-  box-shadow:0 0 6px var(--green-glow);
-}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
-
-/* Terminal text colors */
-.t-green   {color:var(--green);}
-.t-bright  {color:var(--green-glow);font-weight:bold;}
-.t-cyan    {color:var(--cyan);}
-.t-yellow  {color:var(--yellow);}
-.t-red     {color:var(--red);}
-.t-dim     {color:var(--text-dim);}
-.t-white   {color:#ccddcc;}
-.t-orange  {color:var(--orange);}
-.t-purple  {color:var(--purple);}
-.t-blue    {color:var(--blue);}
-.t-cmd     {color:var(--cyan);font-weight:bold;}
-.t-comment {color:var(--green-dark);}
-
-/* Output line types */
-.term-line  {white-space:pre-wrap;word-break:break-all;line-height:1.55;}
-.term-input-echo { color:var(--cyan);margin:2px 0; }
-.term-empty { height:6px; }
-
-/* Bar charts */
-.bar-wrap { display:inline-block;width:120px;height:10px;background:#0a200a;border:1px solid var(--green-dark);vertical-align:middle;position:relative;overflow:hidden; }
-.bar-fill { height:100%;background:var(--green);transition:width 1s; }
-.bar-fill.cyan{background:var(--cyan);}
-.bar-fill.yellow{background:var(--yellow);}
-.bar-fill.red{background:var(--red);}
-
-/* Glitch effect */
-@keyframes glitch {
-  0%{transform:translate(0);}
-  20%{transform:translate(-2px,1px);filter:hue-rotate(20deg);}
-  40%{transform:translate(2px,-1px);}
-  60%{transform:translate(0);filter:none;}
-  80%{transform:translate(-1px,2px);}
-  100%{transform:translate(0);}
-}
-.glitch { animation:glitch 0.15s; }
-
-/* ── Dashboard Panel (Right) ────────────────── */
-#dash {
-  width:300px;flex-shrink:0;
-  background:var(--bg3);
-  border-left:1px solid var(--border);
-  display:flex;flex-direction:column;
-  overflow-y:auto;overflow-x:hidden;
-  gap:0;
-}
-#dash::-webkit-scrollbar{width:4px;}
-#dash::-webkit-scrollbar-thumb{background:var(--border);}
-
-.dash-widget {
-  border-bottom:1px solid var(--border2);
-  padding:8px 10px;flex-shrink:0;
-}
-.dash-title {
-  font-size:10px;font-weight:bold;
-  color:var(--cyan);letter-spacing:1.5px;
-  margin-bottom:6px;
-  display:flex;align-items:center;gap:6px;
-}
-.dash-title::before {
-  content:'';display:inline-block;width:3px;height:10px;
-  background:var(--cyan);flex-shrink:0;
+#output::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* Stat row */
-.stat-row {
-  display:flex;align-items:center;justify-content:space-between;
-  margin:3px 0;font-size:11px;
+#output::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
 }
-.stat-label{color:var(--text-dim);}
-.stat-val  {color:var(--green);font-weight:bold;}
 
-/* Mini bar (dashboard) */
-.mbar-wrap{display:flex;align-items:center;gap:5px;width:100%;margin:3px 0;}
-.mbar-name{color:var(--text-dim);font-size:10px;width:32px;flex-shrink:0;}
-.mbar-track{flex:1;height:7px;background:#0a200a;border:1px solid var(--green-dark);overflow:hidden;}
-.mbar-fill{height:100%;background:var(--green);transition:width 2s;}
-.mbar-fill.c{background:var(--cyan);}
-.mbar-fill.y{background:var(--yellow);}
-.mbar-fill.r{background:var(--red);}
-.mbar-pct{color:var(--green);font-size:10px;width:30px;text-align:right;}
-
-/* Threat level */
-.threat-badge {
-  display:inline-block;padding:2px 10px;border-radius:2px;
-  font-size:11px;font-weight:bold;letter-spacing:1px;
-  border:1px solid;margin:4px 0;
+.line {
+  min-height: 1.55em;
 }
-.threat-low    { color:#33ff33;border-color:#33ff33;background:rgba(50,255,50,0.08); }
-.threat-medium { color:#ffcc00;border-color:#ffcc00;background:rgba(255,200,0,0.08); }
-.threat-high   { color:#ff4444;border-color:#ff4444;background:rgba(255,50,50,0.08); }
 
-/* Log feed */
-#log-feed {
-  height:140px;overflow-y:auto;
-  font-size:10px;line-height:1.55;
-  padding:2px 0;
+.prompt-line {
+  min-height: 1.55em;
 }
-#log-feed::-webkit-scrollbar{width:3px;}
-#log-feed::-webkit-scrollbar-thumb{background:var(--border);}
-.log-entry{padding:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.log-info  {color:var(--text-dim);}
-.log-ok    {color:var(--green);}
-.log-warn  {color:var(--yellow);}
-.log-err   {color:var(--red);}
-.log-ai    {color:var(--purple);}
 
-/* Network connections */
-.conn-row {
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:10px;padding:1.5px 0;border-bottom:1px solid #091509;
+.prompt-label,
+.prompt-input {
+  white-space: pre;
 }
-.conn-ip{color:var(--cyan-dim);}
-.conn-port{color:var(--text-dim);}
-.conn-state-e{color:var(--green);}
-.conn-state-l{color:var(--yellow);}
 
-/* AI model status */
-.model-row{font-size:10px;padding:2px 0;display:flex;justify-content:space-between;}
-.model-name{color:var(--cyan-dim);}
-.model-acc{color:var(--yellow);}
-.model-run{color:var(--green);}
+.dim {
+  color: #bdbdbd;
+}
 
+.caret {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  vertical-align: text-bottom;
+  background: #f2f2f2;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+#viewer {
+  position: fixed;
+  top: 22px;
+  left: 90px;
+  width: 760px;
+  height: 560px;
+  display: none;
+  border: 1px solid #6e6e6e;
+  background: #d5d2c5;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  color: #1d1d1d;
+  z-index: 900;
+  cursor: default;
+}
+
+#viewer.open {
+  display: block;
+}
+
+#viewer-titlebar {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  background: linear-gradient(180deg, #2840b7 0%, #1f3197 100%);
+  color: #fff;
+  font: 700 12px Tahoma, sans-serif;
+}
+
+#viewer-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#viewer-close {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: #d8d8d8;
+  color: #000;
+  font: 700 11px Tahoma, sans-serif;
+}
+
+#viewer-content {
+  height: calc(100% - 28px);
+  overflow: auto;
+  padding: 22px 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.55), transparent 35%),
+    linear-gradient(180deg, #efede3 0%, #e3e0d2 100%);
+  font-family: "Times New Roman", serif;
+}
+
+#viewer-content::-webkit-scrollbar {
+  width: 12px;
+}
+
+#viewer-content::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+  border: 2px solid #e5e5e5;
+}
+
+.doc-shell {
+  min-height: 100%;
+}
+
+.doc-header {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.doc-brand {
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.05;
+}
+
+.doc-brand small {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.doc-title {
+  font-size: 52px;
+  line-height: 0.95;
+  font-weight: 700;
+}
+
+.doc-subtitle {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.doc-copy {
+  margin-top: 18px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.doc-divider {
+  margin: 22px 0 18px;
+  border-top: 2px solid rgba(20, 20, 20, 0.6);
+}
+
+.doc-nav {
+  display: grid;
+  gap: 8px;
+  width: 170px;
+  margin-top: 14px;
+  font-size: 17px;
+}
+
+.doc-nav span {
+  text-decoration: underline;
+}
+
+.doc-section-title {
+  margin: 8px 0 14px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.doc-list {
+  margin-left: 22px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.doc-card {
+  padding: 14px 16px;
+  margin: 12px 0;
+  border: 1px solid rgba(20, 20, 20, 0.25);
+  background: rgba(255, 255, 255, 0.35);
+}
 </style>
 </head>
 <body>
-
-<!-- SVG Cursor (crosshair style) -->
-<svg id="cursor" viewBox="0 0 18 18" fill="none">
-  <line x1="9" y1="0" x2="9" y2="7"   stroke="#33ff33" stroke-width="1.2"/>
-  <line x1="9" y1="11" x2="9" y2="18" stroke="#33ff33" stroke-width="1.2"/>
-  <line x1="0" y1="9" x2="7" y2="9"   stroke="#33ff33" stroke-width="1.2"/>
-  <line x1="11" y1="9" x2="18" y2="9" stroke="#33ff33" stroke-width="1.2"/>
-  <rect x="6.5" y="6.5" width="5" height="5" stroke="#33ff33" stroke-width="1" fill="rgba(51,255,51,0.12)"/>
+<svg id="cursor" viewBox="0 0 16 16" fill="none">
+  <line x1="8" y1="0" x2="8" y2="6" stroke="#ffffff" stroke-width="1.1"></line>
+  <line x1="8" y1="10" x2="8" y2="16" stroke="#ffffff" stroke-width="1.1"></line>
+  <line x1="0" y1="8" x2="6" y2="8" stroke="#ffffff" stroke-width="1.1"></line>
+  <line x1="10" y1="8" x2="16" y2="8" stroke="#ffffff" stroke-width="1.1"></line>
 </svg>
 
-<!-- Boot Screen -->
-<div id="boot">
-  <div id="boot-text"></div>
+<div id="terminal">
+  <div id="output"></div>
 </div>
 
-<!-- Status Bar -->
-<div id="statusbar">
-  <div class="sb-item">
-    <div class="sb-dot dot-green"></div>
-    <span class="sb-bright">AI-SEC-WS-01</span>
+<div id="viewer">
+  <div id="viewer-titlebar">
+    <div id="viewer-title">viewer</div>
+    <button id="viewer-close" type="button">X</button>
   </div>
-  <div class="sb-item">
-    <span>IPv4</span>
-    <span class="sb-bright">192.168.0.101</span>
-  </div>
-  <div class="sb-item">
-    <span>SESSION</span>
-    <span class="sb-bright" id="sb-session">00:00:00</span>
-  </div>
-  <div class="sb-item">
-    <span>UPTIME</span>
-    <span class="sb-bright">847d 12h 33m</span>
-  </div>
-  <div class="sb-item">
-    <span>THREATS</span>
-    <div class="sb-dot dot-green"></div>
-    <span class="sb-bright" id="sb-threats">0 ACTIVE</span>
-  </div>
-  <div class="sb-item">
-    <span id="sb-clock" class="sb-bright">--:--:--</span>
-  </div>
-</div>
-
-<!-- Main Layout -->
-<div id="main">
-
-  <!-- Terminal Panel -->
-  <div id="term-panel">
-    <div id="term-header">
-      <div class="term-dot td-red"></div>
-      <div class="term-dot td-yellow"></div>
-      <div class="term-dot td-green"></div>
-      <span style="margin-left:8px;color:#1a5a1a;">bash — root@ai-sec-ws-01 — 80×24</span>
-    </div>
-    <div id="term-output"></div>
-    <div id="term-input-row">
-      <span id="term-prompt-label">root@ai-sec:~$</span>
-      <div id="term-input-display"><span id="term-typed"></span><span class="cursor-block"></span></div>
-    </div>
-  </div>
-
-  <!-- Dashboard Panel -->
-  <div id="dash">
-
-    <!-- System Stats -->
-    <div class="dash-widget">
-      <div class="dash-title">SYSTEM STATUS</div>
-      <div class="mbar-wrap"><span class="mbar-name">CPU</span><div class="mbar-track"><div class="mbar-fill" id="d-cpu" style="width:42%"></div></div><span class="mbar-pct" id="d-cpu-t">42%</span></div>
-      <div class="mbar-wrap"><span class="mbar-name">RAM</span><div class="mbar-track"><div class="mbar-fill c" id="d-ram" style="width:68%"></div></div><span class="mbar-pct" id="d-ram-t">68%</span></div>
-      <div class="mbar-wrap"><span class="mbar-name">NET↓</span><div class="mbar-track"><div class="mbar-fill y" id="d-net" style="width:23%"></div></div><span class="mbar-pct" id="d-net-t">23%</span></div>
-      <div class="mbar-wrap"><span class="mbar-name">DISK</span><div class="mbar-track"><div class="mbar-fill" id="d-dsk" style="width:55%"></div></div><span class="mbar-pct" id="d-dsk-t">55%</span></div>
-      <div style="margin-top:5px;display:flex;justify-content:space-between;">
-        <span style="font-size:10px;color:var(--text-dim);">Processes: <span style="color:var(--green);">247</span></span>
-        <span style="font-size:10px;color:var(--text-dim);">Load: <span style="color:var(--green);">1.24</span></span>
-      </div>
-    </div>
-
-    <!-- Security Status -->
-    <div class="dash-widget">
-      <div class="dash-title">SECURITY STATUS</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <span style="font-size:10px;color:var(--text-dim);">THREAT LEVEL</span>
-        <span class="threat-badge threat-low" id="d-threat">LOW</span>
-      </div>
-      <div class="stat-row"><span class="stat-label">IDS Rules Active</span><span class="stat-val">24,891</span></div>
-      <div class="stat-row"><span class="stat-label">CVEs Monitored</span><span class="stat-val">1,204</span></div>
-      <div class="stat-row"><span class="stat-label">Blocked Today</span><span class="stat-val t-yellow" id="d-blocked">47</span></div>
-      <div class="stat-row"><span class="stat-label">Last ML Scan</span><span class="stat-val" id="d-scan-ago">2m ago</span></div>
-      <div class="stat-row"><span class="stat-label">Firewall</span><span class="stat-val t-cyan">ACTIVE</span></div>
-      <div class="stat-row"><span class="stat-label">Encryption</span><span class="stat-val t-cyan">AES-256</span></div>
-    </div>
-
-    <!-- AI Models -->
-    <div class="dash-widget">
-      <div class="dash-title">AI/ML MODELS</div>
-      <div class="model-row"><span class="model-name">adversarial_det_v4</span><span class="model-acc">99.2%</span><span class="model-run">● RUN</span></div>
-      <div class="model-row"><span class="model-name">anomaly_detector</span><span class="model-acc">97.8%</span><span class="model-run">● RUN</span></div>
-      <div class="model-row"><span class="model-name">malware_classifier</span><span class="model-acc">98.5%</span><span class="model-run">● RUN</span></div>
-      <div class="model-row"><span class="model-name">llm_guard_v2</span><span class="model-acc">96.1%</span><span class="model-run t-yellow">● IDLE</span></div>
-      <div style="margin-top:5px;font-size:10px;color:var(--text-dim);">
-        Framework: <span style="color:var(--cyan);">PyTorch 2.1</span> &nbsp;|&nbsp;
-        GPU: <span style="color:var(--cyan);">RTX 4090</span>
-      </div>
-    </div>
-
-    <!-- Active Connections -->
-    <div class="dash-widget">
-      <div class="dash-title">CONNECTIONS</div>
-      <div class="conn-row"><span class="conn-ip">10.0.0.12</span><span class="conn-port">:443</span><span class="conn-state-e">ESTABLISHED</span></div>
-      <div class="conn-row"><span class="conn-ip">10.0.0.34</span><span class="conn-port">:22</span><span class="conn-state-e">ESTABLISHED</span></div>
-      <div class="conn-row"><span class="conn-ip">172.16.0.5</span><span class="conn-port">:8080</span><span class="conn-state-l">LISTEN</span></div>
-      <div class="conn-row"><span class="conn-ip" id="conn-dynamic">192.168.1.87</span><span class="conn-port">:443</span><span class="conn-state-e">ESTABLISHED</span></div>
-      <div style="margin-top:4px;font-size:10px;color:var(--text-dim);">
-        <span id="conn-count">4</span> active ·
-        <span style="color:var(--green);" id="conn-bytes">2.4 MB/s</span>
-      </div>
-    </div>
-
-    <!-- Event Log -->
-    <div class="dash-widget" style="flex:1;">
-      <div class="dash-title">EVENT LOG</div>
-      <div id="log-feed"></div>
-    </div>
-
-  </div>
+  <div id="viewer-content"></div>
 </div>
 
 <script>
-/* ══ Cursor ══════════════════════════════════════ */
-const cur = document.getElementById('cursor');
-document.addEventListener('mousemove', e => {
-  cur.style.left = (e.clientX - 9) + 'px';
-  cur.style.top  = (e.clientY - 9) + 'px';
-  window.parent.postMessage({ type:'mousemove', clientX:e.clientX, clientY:e.clientY }, '*');
+const displayName = "\uBC15\uC131\uD638_\uD3EC\uD2B8\uD3F4\uB9AC\uC624";
+const homeDisplayPath = "C:\\Users\\" + displayName;
+
+const cursor = document.getElementById("cursor");
+document.addEventListener("mousemove", (event) => {
+  cursor.style.left = (event.clientX - 8) + "px";
+  cursor.style.top = (event.clientY - 8) + "px";
+  window.parent.postMessage({ type: "mousemove", clientX: event.clientX, clientY: event.clientY }, "*");
 });
-['mousedown','mouseup'].forEach(t => {
-  document.addEventListener(t, e => {
-    window.parent.postMessage({ type:t, clientX:e.clientX, clientY:e.clientY }, '*');
+
+["mousedown", "mouseup"].forEach((type) => {
+  document.addEventListener(type, (event) => {
+    window.parent.postMessage({ type, clientX: event.clientX, clientY: event.clientY }, "*");
   });
 });
-['keydown','keyup'].forEach(t => {
-  document.addEventListener(t, e => {
-    window.parent.postMessage({ type:t, key:e.key }, '*');
+
+["keydown", "keyup"].forEach((type) => {
+  document.addEventListener(type, (event) => {
+    window.parent.postMessage({ type, key: event.key }, "*");
   });
 });
 
-/* ══ Status Bar Clock ════════════════════════════ */
-function updateClock() {
-  const n = new Date();
-  document.getElementById('sb-clock').textContent =
-    String(n.getHours()).padStart(2,'0')+':'+
-    String(n.getMinutes()).padStart(2,'0')+':'+
-    String(n.getSeconds()).padStart(2,'0');
-}
-updateClock(); setInterval(updateClock, 1000);
+const output = document.getElementById("output");
+const viewer = document.getElementById("viewer");
+const viewerTitle = document.getElementById("viewer-title");
+const viewerContent = document.getElementById("viewer-content");
+const viewerClose = document.getElementById("viewer-close");
 
-/* Session timer */
-let sessionSec = 0;
-setInterval(() => {
-  sessionSec++;
-  const h = Math.floor(sessionSec/3600), m = Math.floor((sessionSec%3600)/60), s = sessionSec%60;
-  document.getElementById('sb-session').textContent =
-    String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-}, 1000);
+let buffer = "";
+let history = [];
+let historyIndex = -1;
+let activePromptLine = null;
+let activePromptInput = null;
+let currentPath = homeDisplayPath;
 
-/* ══ Boot Sequence ═══════════════════════════════ */
-const BOOT_LINES = [
-  { txt: 'BIOS v2.1.0  AI-SEC Systems, Inc.', delay:0 },
-  { txt: 'CPU: Intel Xeon W9-3595X @ 5.0GHz  [64 cores]  RAM: 128GB DDR5', delay:200 },
-  { txt: 'Detecting storage devices...', delay:400 },
-  { txt: '  /dev/nvme0n1  2.0TB  [OK]', delay:600, cls:'boot-ok' },
-  { txt: 'Loading kernel modules...', delay:850 },
-  { txt: '  [    0.000000] Initializing cgroup subsys cpuset', delay:1000, cls:'boot-ok' },
-  { txt: '  [    0.001248] Kernel command line: BOOT_IMAGE=/vmlinuz-5.15.0-aisec', delay:1100 },
-  { txt: '  [    0.234891] ai_sec_kmod: AI Security Kernel Module loaded', delay:1200, cls:'boot-ok' },
-  { txt: 'Loading security protocols...                              [ OK ]', delay:1400, cls:'boot-ok' },
-  { txt: 'Starting AI Threat Detection Engine...                    [ OK ]', delay:1550, cls:'boot-ok' },
-  { txt: 'Initializing ML model runtime (PyTorch 2.1.0)...          [ OK ]', delay:1700, cls:'boot-ok' },
-  { txt: 'Establishing encrypted tunnel (AES-256-GCM)...            [ OK ]', delay:1850, cls:'boot-ok' },
-  { txt: 'Loading IDS rules (24,891 signatures)...                  [ OK ]', delay:2000, cls:'boot-ok' },
-  { txt: 'Connecting to Threat Intelligence feed...                 [ OK ]', delay:2150, cls:'boot-ok' },
-  { txt: '', delay:2350 },
-  { txt: '  ╔════════════════════════════════════════════════════════╗', delay:2400 },
-  { txt: '  ║   AI-SEC WORKSTATION v2.1  ·  AUTHORIZED ACCESS ONLY  ║', delay:2450 },
-  { txt: '  ║   All activities are monitored and logged.             ║', delay:2500 },
-  { txt: '  ╚════════════════════════════════════════════════════════╝', delay:2550 },
-  { txt: '', delay:2650 },
-  { txt: 'System ready. Type "help" for available commands.', delay:2700, cls:'boot-ok' },
-];
+const files = {
+  "C:\\Users": { type: "dir", children: [displayName] },
+  [homeDisplayPath]: { type: "dir", children: ["about", "projects", "contact", "resume"] },
+  [homeDisplayPath + "\\about"]: { type: "dir", children: ["profile.txt", "skills.txt", "experience.txt"] },
+  [homeDisplayPath + "\\projects"]: { type: "dir", children: ["adversarial_ml.txt", "llm_scanner.txt", "intrusion_detection.txt"] },
+  [homeDisplayPath + "\\contact"]: { type: "dir", children: ["contact.txt"] },
+  [homeDisplayPath + "\\resume"]: { type: "dir", children: ["resume.txt"] },
+  [homeDisplayPath + "\\about\\profile.txt"]: {
+    type: "file",
+    title: "Profile",
+    content: `
+      <div class="doc-shell">
+        <div class="doc-header">
+          <div>
+            <div class="doc-brand">Park<br>Seongho<small>Portfolio '26</small></div>
+            <div class="doc-nav">
+              <span>HOME</span>
+              <span>ABOUT</span>
+              <span>EXPERIENCE</span>
+              <span>PROJECTS</span>
+              <span>CONTACT</span>
+            </div>
+          </div>
+          <div>
+            <div class="doc-title">Welcome</div>
+            <div class="doc-subtitle">I'm Park Seongho</div>
+            <div class="doc-copy">
+              I build AI security systems, red-team LLM applications, and review model risk in production environments.
+              This portfolio is presented as a terminal-driven workspace, but the document viewer opens a cleaner summary
+              when you inspect files with <strong>cat</strong>.
+            </div>
+            <div class="doc-divider"></div>
+            <div class="doc-section-title">About Me</div>
+            <div class="doc-copy">
+              My focus is practical AI security: prompt injection defense, model robustness evaluation, and threat modeling
+              for products that actually ship. I prefer systems that feel operational, not decorative.
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  [homeDisplayPath + "\\about\\skills.txt"]: {
+    type: "file",
+    title: "Skills",
+    content: `
+      <div class="doc-shell">
+        <div class="doc-title" style="font-size:46px;">Skills</div>
+        <div class="doc-subtitle">Core Areas</div>
+        <div class="doc-divider"></div>
+        <div class="doc-card">
+          <div class="doc-section-title">AI Security</div>
+          <ul class="doc-list">
+            <li>LLM prompt injection analysis</li>
+            <li>Adversarial machine learning</li>
+            <li>Model robustness testing</li>
+            <li>Threat modeling for AI applications</li>
+          </ul>
+        </div>
+        <div class="doc-card">
+          <div class="doc-section-title">Engineering</div>
+          <ul class="doc-list">
+            <li>Python, TypeScript, PyTorch, TensorFlow</li>
+            <li>Docker, AWS, API security, monitoring</li>
+            <li>Terminal-first workflows and review tooling</li>
+          </ul>
+        </div>
+      </div>
+    `
+  },
+  [homeDisplayPath + "\\about\\experience.txt"]: {
+    type: "file",
+    title: "Experience",
+    content: `
+      <div class="doc-shell">
+        <div class="doc-title" style="font-size:46px;">Experience</div>
+        <div class="doc-divider"></div>
+        <div class="doc-card">
+          <div class="doc-section-title">AI Security Engineer</div>
+          <div class="doc-copy">Security reviews, prompt-injection evaluation, red-teaming, and applied hardening for LLM products.</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-section-title">Security Research</div>
+          <div class="doc-copy">Research on adversarial ML, system misuse paths, and operational defenses for model-serving infrastructure.</div>
+        </div>
+      </div>
+    `
+  },
+  [homeDisplayPath + "\\projects\\adversarial_ml.txt"]: {
+    type: "file",
+    title: "Adversarial ML Defense Framework",
+    content: `
+      <div class="doc-shell">
+        <div class="doc-title" style="font-size:40px;">Adversarial ML Defense Framework</div>
+        <div class="doc-divider"></div>
+        <div class="doc-copy">
+          Toolkit for evaluating and hardening models under adversarial pressure. Includes attack simulation,
+          test reporting, and mitigation validation.
+        </div>
+      </div>
+    `
+  },
+  [homeDisplayPath + "\\projects\\llm_scanner.txt"]: {
+    type: "file",
+    title: "LLM Prompt Injection Scanner",
+    content: `
+      <div class="doc-shell">
+        <div class="doc-title" style="font-size:40px;">LLM Prompt Injection Scanner</div>
+        <div class="doc-divider"></div>
+        <div class="doc-copy">
+          Scanner focused on jailbreaks, prompt overrides, and data exfiltration patterns in LLM-based products.
+        </div>
+      </div>
+    `
+  },
+  [homeDisplayPath + "\\projects\\intrusion_detection.txt"]: {
+    type: "file",
+    title: "AI-Powered Intrusion Detection",
+    content: `
+      <div class="doc-shell">
+        <div class="doc-title" style="font-size:40px;">AI-Powered Intrusion Detection</div>
+        <div class="doc-divider"></div>
+        <div class="doc-copy">
+          Detection pipeline that combines anomaly scoring with operator-friendly triage for security events.
+        </div>
+      </div>
+    `
+  },
+  [homeDisplayPath + "\\contact\\contact.txt"]: {
+    type: "file",
+    title: "Contact",
+    content: `
+      <div class="doc-shell">
+        <div class="doc-title" style="font-size:40px;">Contact</div>
+        <div class="doc-divider"></div>
+        <div class="doc-copy">Email: psh243360@gmail.com</div>
+        <div class="doc-copy">GitHub: github.com/Park-Seongho</div>
+        <div class="doc-copy">LinkedIn: linkedin.com/in/parkseongho</div>
+      </div>
+    `
+  },
+  [homeDisplayPath + "\\resume\\resume.txt"]: {
+    type: "file",
+    title: "Resume",
+    content: `
+      <div class="doc-shell">
+        <div class="doc-title" style="font-size:40px;">Resume</div>
+        <div class="doc-divider"></div>
+        <div class="doc-copy">AI Security Engineer based in Seoul.</div>
+        <div class="doc-copy">Focus on LLM security, adversarial ML, and practical product defense.</div>
+      </div>
+    `
+  }
+};
 
-const bootEl = document.getElementById('boot-text');
-let bootDone = false;
-
-BOOT_LINES.forEach(line => {
-  setTimeout(() => {
-    const span = document.createElement('span');
-    if (line.cls) span.className = line.cls;
-    span.textContent = (line.txt || '') + '\n';
-    bootEl.appendChild(span);
-  }, line.delay);
-});
-
-setTimeout(() => {
-  const boot = document.getElementById('boot');
-  boot.style.opacity = '0';
-  setTimeout(() => {
-    boot.style.display = 'none';
-    bootDone = true;
-    startTerminal();
-  }, 800);
-}, 3200);
-
-/* ══ Terminal Engine ═════════════════════════════ */
-const output = document.getElementById('term-output');
-const typedEl = document.getElementById('term-typed');
-let inputBuffer = '';
-let cmdHistory = [];
-let histIdx = -1;
-
-function addLine(html, cls) {
-  const div = document.createElement('div');
-  div.className = 'term-line' + (cls ? ' '+cls : '');
-  div.innerHTML = html;
-  output.appendChild(div);
+function addLine(text, className = "") {
+  const line = document.createElement("div");
+  line.className = "line" + (className ? " " + className : "");
+  line.textContent = text;
+  output.appendChild(line);
   output.scrollTop = output.scrollHeight;
 }
 
-function addEmpty() {
-  const div = document.createElement('div');
-  div.className = 'term-empty';
-  output.appendChild(div);
+function promptText() {
+  return currentPath + ">";
 }
 
-function echoCmd(cmd) {
-  addLine('<span style="color:var(--cyan)">root@ai-sec:~$</span> <span style="color:var(--green)">' + escHtml(cmd) + '</span>');
+function ensurePrompt() {
+  if (activePromptLine) return;
+
+  activePromptLine = document.createElement("div");
+  activePromptLine.className = "prompt-line";
+
+  const label = document.createElement("span");
+  label.className = "prompt-label";
+  label.textContent = promptText();
+
+  activePromptInput = document.createElement("span");
+  activePromptInput.className = "prompt-input";
+
+  const caret = document.createElement("span");
+  caret.className = "caret";
+
+  activePromptLine.appendChild(label);
+  activePromptLine.appendChild(activePromptInput);
+  activePromptLine.appendChild(caret);
+  output.appendChild(activePromptLine);
+  output.scrollTop = output.scrollHeight;
 }
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function updatePrompt() {
+  if (!activePromptLine) return;
+  activePromptLine.querySelector(".prompt-label").textContent = promptText();
 }
 
-function bar(pct, cls) {
-  const filled = Math.round(pct / 5);
-  const empty  = 20 - filled;
-  return '<span class="' + (cls||'t-green') + '">' +
-    '█'.repeat(filled) + '░'.repeat(empty) + '</span> ' +
-    '<span class="t-yellow">' + pct + '%</span>';
+function updateBufferView() {
+  if (!activePromptInput) return;
+  activePromptInput.textContent = buffer;
+  output.scrollTop = output.scrollHeight;
 }
 
-/* ── Commands ──────────────────────────────────── */
-const CMDS = {
+function commitPrompt(command) {
+  if (!activePromptLine) return;
+  const line = document.createElement("div");
+  line.className = "line";
+  line.textContent = promptText() + command;
+  output.replaceChild(line, activePromptLine);
+  activePromptLine = null;
+  activePromptInput = null;
+}
 
-help() {
-  addEmpty();
-  addLine('<span class="t-cyan">╔══ AVAILABLE COMMANDS ═══════════════════════════════════════╗</span>');
-  const cmds = [
-    ['whoami / about', 'Identity & profile'],
-    ['skills',         'Technical skills & expertise'],
-    ['projects',       'Featured security projects'],
-    ['contact',        'Contact information'],
-    ['resume',         'View resume / CV'],
-    ['experience',     'Work experience'],
-    ['nmap',           'Run network discovery scan'],
-    ['status',         'System & security overview'],
-    ['ls',             'List available files'],
-    ['clear',          'Clear terminal screen'],
-    ['history',        'Command history'],
-    ['sudo [cmd]',     'Privilege escalation (try it)'],
-    ['hack',           'Initiate hacking sequence'],
-  ];
-  cmds.forEach(([c,d]) => {
-    addLine('<span class="t-cyan">║</span>  <span class="t-bright">' +
-      c.padEnd(22) + '</span><span class="t-dim">' + d + '</span>');
-  });
-  addLine('<span class="t-cyan">╚══════════════════════════════════════════════════════════════╝</span>');
-  addEmpty();
-},
+function normalizePath(path) {
+  return path.replace(/\//g, "\\").replace(/\\\\+/g, "\\");
+}
 
-whoami() { CMDS.about(); },
+function resolvePath(input) {
+  const target = (input || "").trim();
+  if (!target) return currentPath;
 
-about() {
-  addEmpty();
-  addLine('<span class="t-cyan">┌─ IDENTITY PROFILE ─────────────────────────────────────────┐</span>');
-  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Name     </span> <span class="t-bright">Park Seongho  (박성호)</span>');
-  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Role     </span> <span class="t-green">AI Security Solutions Developer</span>');
-  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Status   </span> <span class="t-bright">●</span> <span style="color:#33ff88;">AVAILABLE FOR OPPORTUNITIES</span>');
-  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Location </span> <span class="t-white">Seoul, South Korea  ·  Remote OK</span>');
-  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Email    </span> <span class="t-cyan">psh243360@gmail.com</span>');
-  addLine('<span class="t-cyan">│</span>  <span class="t-dim">Focus    </span> <span class="t-white">AI/ML Security  ·  Adversarial ML  ·  AI Red-teaming</span>');
-  addLine('<span class="t-cyan">└────────────────────────────────────────────────────────────┘</span>');
-  addEmpty();
-  addLine('<span class="t-white">Passionate about identifying and mitigating vulnerabilities in</span>');
-  addLine('<span class="t-white">AI and machine learning systems. Specialized in adversarial</span>');
-  addLine('<span class="t-white">attacks, model robustness, and building security frameworks</span>');
-  addLine('<span class="t-white">for AI-powered systems in production environments.</span>');
-  addEmpty();
-},
-
-skills() {
-  addEmpty();
-  addLine('<span class="t-cyan">══ AI / ML SECURITY ═══════════════════════════════════════</span>');
-  [
-    ['Adversarial Machine Learning',  92],
-    ['AI Red-Teaming & Auditing',      90],
-    ['Data Poisoning Detection',       87],
-    ['Model Robustness Testing',       84],
-    ['LLM Security & Prompt Injection',88],
-    ['Secure ML Pipeline Design',      80],
-  ].forEach(([n,p])=>{
-    addLine('  <span class="t-white">' + n.padEnd(36) + '</span>' + bar(p,'t-green'));
-  });
-  addEmpty();
-  addLine('<span class="t-cyan">══ CYBERSECURITY ══════════════════════════════════════════</span>');
-  [
-    ['Penetration Testing',   83],
-    ['Vulnerability Research',88],
-    ['Network Security',      78],
-    ['Security Architecture', 75],
-    ['Threat Modeling',       85],
-    ['Incident Response',     72],
-  ].forEach(([n,p])=>{
-    addLine('  <span class="t-white">' + n.padEnd(36) + '</span>' + bar(p,'t-cyan'));
-  });
-  addEmpty();
-  addLine('<span class="t-cyan">══ TOOLS & FRAMEWORKS ═════════════════════════════════════</span>');
-  addLine('  <span class="t-yellow">Languages </span><span class="t-white">Python  C++  Go  Bash  Rust</span>');
-  addLine('  <span class="t-yellow">ML/AI     </span><span class="t-white">PyTorch  TensorFlow  Hugging Face  ONNX</span>');
-  addLine('  <span class="t-yellow">Security  </span><span class="t-white">Metasploit  Burp Suite  Wireshark  Nmap</span>');
-  addLine('  <span class="t-yellow">AI Sec    </span><span class="t-white">Foolbox  ART  CleverHans  TextAttack</span>');
-  addLine('  <span class="t-yellow">Cloud     </span><span class="t-white">AWS  GCP  Azure  Kubernetes  Docker</span>');
-  addEmpty();
-},
-
-projects() {
-  addEmpty();
-  addLine('<span class="t-cyan">══ FEATURED PROJECTS ══════════════════════════════════════</span>');
-  addEmpty();
-  const projs = [
-    {
-      n:'[01] Adversarial ML Defense Framework',
-      t:'AI Security',
-      d:'Comprehensive framework for testing and hardening ML models against adversarial\n      attacks. Implements PGD, FGSM, CW attacks and corresponding defenses.\n      Deployed in 3 production AI systems.',
-      s:'Python · PyTorch · Foolbox · Docker',
-      m:'★ 847 forks on GitHub'
-    },
-    {
-      n:'[02] LLM Prompt Injection Scanner',
-      t:'LLM Security',
-      d:'Automated scanner for detecting prompt injection vulnerabilities in LLM-powered\n      applications. Covers 120+ attack patterns including jailbreaks and data\n      exfiltration vectors.',
-      s:'Python · Hugging Face · FastAPI',
-      m:'Used by 15+ security teams'
-    },
-    {
-      n:'[03] AI-Powered Intrusion Detection',
-      t:'ML + Network Security',
-      d:'Real-time IDS using ensemble ML models (isolation forest + autoencoder +\n      random forest). Achieves 99.2% detection rate with <0.1% false positives\n      on NSL-KDD and CICIDS2017 datasets.',
-      s:'Python · Scikit-learn · Kafka · Elasticsearch',
-      m:'99.2% detection accuracy'
-    },
-    {
-      n:'[04] Data Poisoning Detection Toolkit',
-      t:'AI Security Research',
-      d:'Detection toolkit for training-time attacks on ML models. Implements\n      activation clustering, spectral signatures, and gradient-based detection\n      methods. Published in IEEE S&P 2024.',
-      s:'Python · TensorFlow · NumPy',
-      m:'IEEE S&P 2024 Publication'
-    },
-  ];
-  projs.forEach(p => {
-    addLine('<span class="t-bright">' + p.n + '</span>  <span class="t-dim">[' + p.t + ']</span>');
-    addLine('  <span class="t-white">' + p.d + '</span>');
-    addLine('  <span class="t-yellow">Stack  </span><span class="t-dim">' + p.s + '</span>');
-    addLine('  <span class="t-cyan">→ ' + p.m + '</span>');
-    addEmpty();
-  });
-},
-
-contact() {
-  addEmpty();
-  addLine('<span class="t-cyan">══ CONTACT ════════════════════════════════════════════════</span>');
-  addEmpty();
-  addLine('  <span class="t-dim">Email     </span> <span class="t-cyan">psh243360@gmail.com</span>');
-  addLine('  <span class="t-dim">GitHub    </span> <span class="t-cyan">github.com/Park-Seongho</span>');
-  addLine('  <span class="t-dim">LinkedIn  </span> <span class="t-cyan">linkedin.com/in/parkseongho</span>');
-  addLine('  <span class="t-dim">Location  </span> <span class="t-white">Seoul, South Korea</span>');
-  addEmpty();
-  addLine('  <span style="color:#33ff88;">● OPEN TO</span>  <span class="t-white">Full-time · Contract · Research Collaboration</span>');
-  addLine('  <span class="t-dim">          Remote available worldwide</span>');
-  addEmpty();
-},
-
-resume() {
-  addEmpty();
-  addLine('<span class="t-cyan">══ RESUME — PARK SEONGHO ══════════════════════════════════</span>');
-  addEmpty();
-  addLine('<span class="t-bright">EDUCATION</span>');
-  addLine('  <span class="t-white">B.S. Computer Science & Security Engineering</span>');
-  addLine('  <span class="t-dim">Focus: AI Systems · Cybersecurity · Machine Learning</span>');
-  addEmpty();
-  addLine('<span class="t-bright">CERTIFICATIONS</span>');
-  ['AI/ML Security Specialist (AMSS)', 'Certified Ethical Hacker (CEH)', 'AWS Certified Security — Specialty', 'Google Professional Cloud Security Engineer'].forEach(c => {
-    addLine('  <span class="t-cyan">▸</span> <span class="t-white">' + c + '</span>');
-  });
-  addEmpty();
-  addLine('<span class="t-bright">KEY SKILLS</span>');
-  addLine('  <span class="t-white">Python · C++ · PyTorch · TensorFlow · Kubernetes · Docker</span>');
-  addLine('  <span class="t-white">Adversarial ML · Pen Testing · SIEM · IDS/IPS · AWS · GCP</span>');
-  addEmpty();
-  addLine('<span class="t-bright">PUBLICATIONS</span>');
-  addLine('  <span class="t-cyan">▸</span> <span class="t-white">"Data Poisoning Defense for ML Pipelines" — IEEE S&P 2024</span>');
-  addLine('  <span class="t-cyan">▸</span> <span class="t-white">"Adversarial Robustness in LLMs" — arXiv:2024.xxxxx</span>');
-  addEmpty();
-  addLine('  <span class="t-dim">[ Type "contact" to get in touch ]</span>');
-  addEmpty();
-},
-
-experience() {
-  addEmpty();
-  addLine('<span class="t-cyan">══ WORK EXPERIENCE ════════════════════════════════════════</span>');
-  addEmpty();
-  const exp = [
-    { role:'AI Security Solutions Developer', co:'Security Research Lab', period:'2023 – Present',
-      items:['Developing adversarial ML defense frameworks deployed in production', 'Leading AI red-team exercises for enterprise clients', 'Building automated LLM security audit pipelines'] },
-    { role:'Security Researcher (Intern)', co:'Cybersecurity Institute', period:'2022 – 2023',
-      items:['Vulnerability research on ML-based anomaly detection systems', 'Contributed to open-source adversarial attack toolkits', 'Published 2 peer-reviewed papers on AI security'] },
-  ];
-  exp.forEach(e => {
-    addLine('<span class="t-bright">' + e.role + '</span>');
-    addLine('  <span class="t-cyan">' + e.co + '</span>  <span class="t-dim">' + e.period + '</span>');
-    e.items.forEach(i => addLine('  <span class="t-cyan">·</span> <span class="t-white">' + i + '</span>'));
-    addEmpty();
-  });
-},
-
-status() {
-  addEmpty();
-  addLine('<span class="t-cyan">══ SYSTEM & SECURITY STATUS ═══════════════════════════════</span>');
-  addEmpty();
-  addLine('  <span class="t-dim">Hostname    </span><span class="t-green">ai-sec-ws-01</span>');
-  addLine('  <span class="t-dim">OS          </span><span class="t-white">Ubuntu 22.04 LTS (AI-SEC Edition)</span>');
-  addLine('  <span class="t-dim">Kernel      </span><span class="t-white">5.15.0-aisec-hardened</span>');
-  addLine('  <span class="t-dim">Uptime      </span><span class="t-white">847 days, 12 hours, 33 minutes</span>');
-  addLine('  <span class="t-dim">User        </span><span class="t-cyan">root (Park Seongho)</span>');
-  addEmpty();
-  addLine('  <span class="t-dim">Threat Level </span><span class="t-green">LOW  ●</span>');
-  addLine('  <span class="t-dim">Firewall     </span><span class="t-cyan">ACTIVE (nftables)</span>');
-  addLine('  <span class="t-dim">IDS/IPS      </span><span class="t-cyan">ACTIVE (Suricata 6.0.12)</span>');
-  addLine('  <span class="t-dim">Encryption   </span><span class="t-cyan">AES-256-GCM / TLS 1.3</span>');
-  addLine('  <span class="t-dim">SELinux      </span><span class="t-cyan">ENFORCING</span>');
-  addEmpty();
-  addLine('  <span class="t-dim">AI Models    </span><span class="t-green">4 running  /  1 idle</span>');
-  addLine('  <span class="t-dim">Detections   </span><span class="t-yellow">47 blocked today  /  0 critical</span>');
-  addEmpty();
-},
-
-ls() {
-  addEmpty();
-  addLine('<span class="t-dim">total 48</span>');
-  const files = [
-    { p:'drwxr-xr-x', n:'projects/',   c:'t-yellow' },
-    { p:'drwxr-xr-x', n:'models/',     c:'t-yellow' },
-    { p:'-rw-r--r--', n:'about.txt',   c:'t-white' },
-    { p:'-rw-r--r--', n:'skills.txt',  c:'t-white' },
-    { p:'-rw-r--r--', n:'contact.txt', c:'t-white' },
-    { p:'-rwxr-xr-x', n:'resume.pdf',  c:'t-cyan' },
-    { p:'-rw-------', n:'id_rsa',      c:'t-red' },
-    { p:'-rw-r--r--', n:'.bashrc',     c:'t-dim' },
-  ];
-  files.forEach(f => {
-    addLine(f.p + '  root  root  <span class="' + f.c + '">' + f.n + '</span>');
-  });
-  addEmpty();
-  addLine('<span class="t-dim">[ Try: cat about.txt · cat skills.txt · cat contact.txt ]</span>');
-  addEmpty();
-},
-
-clear() {
-  output.innerHTML = '';
-},
-
-history() {
-  addEmpty();
-  if (cmdHistory.length === 0) {
-    addLine('<span class="t-dim">No commands in history.</span>');
+  let working;
+  if (/^[a-zA-Z]:\\/.test(target)) {
+    working = normalizePath(target);
+  } else if (target === "\\") {
+    working = "C:\\";
+  } else if (target.startsWith("\\")) {
+    working = "C:" + normalizePath(target);
   } else {
-    cmdHistory.forEach((c,i) => {
-      addLine('  <span class="t-dim">' + String(i+1).padStart(4) + '</span>  <span class="t-white">' + escHtml(c) + '</span>');
-    });
+    working = currentPath + "\\" + target;
   }
-  addEmpty();
-},
 
-nmap() {
-  addEmpty();
-  addLine('<span class="t-cyan">Starting Nmap 7.94 ( https://nmap.org )</span>');
-  addLine('<span class="t-dim">Scanning local network 192.168.0.0/24 ...</span>');
-  setTimeout(()=>{
-    addEmpty();
-    addLine('Nmap scan report for <span class="t-cyan">ai-sec-gateway.local (192.168.0.1)</span>');
-    addLine('<span class="t-dim">Host is up (0.0014s latency).</span>');
-    addEmpty();
-    addLine('<span class="t-yellow">PORT      STATE  SERVICE      VERSION</span>');
-    [['22/tcp','open','ssh','OpenSSH 9.3p1'],
-     ['80/tcp','open','http','nginx 1.25.3'],
-     ['443/tcp','open','https','nginx 1.25.3 (TLS 1.3)'],
-     ['8443/tcp','open','ai-api','FastAPI 0.104'],
-     ['9090/tcp','open','prometheus','Prometheus 2.47'],
-    ].forEach(([p,s,sv,v])=>{
-      addLine(p.padEnd(10) + '<span class="t-green">' + s + '</span>   ' + sv.padEnd(14) + '<span class="t-dim">' + v + '</span>');
-    });
-    addEmpty();
-    addLine('<span class="t-green">AI-SEC Scanner: No critical vulnerabilities detected.</span>');
-    addLine('<span class="t-dim">Nmap done: 1 IP address (1 host up) scanned in 4.23 seconds</span>');
-    addEmpty();
-  }, 1200);
-},
+  const driveMatch = working.match(/^[a-zA-Z]:/);
+  const drive = driveMatch ? driveMatch[0] : "C:";
+  const tail = working.slice(drive.length).split("\\").filter(Boolean);
+  const result = [];
 
-hack() {
-  addEmpty();
-  addLine('<span class="t-yellow">Initializing breach sequence...</span>');
-  let frames = ['[▓░░░░░░░░░]  10%','[▓▓▓░░░░░░░]  30%','[▓▓▓▓▓░░░░░]  50%','[▓▓▓▓▓▓▓░░░]  70%','[▓▓▓▓▓▓▓▓▓░]  90%'];
-  let i = 0;
-  const iv = setInterval(()=>{
-    if(i < frames.length){
-      addLine('<span class="t-green">' + frames[i] + '</span>');
-      i++;
-    } else {
-      clearInterval(iv);
-      addEmpty();
-      addLine('<span class="t-red">ACCESS DENIED</span>  <span class="t-dim">— just kidding. You\'re already in.</span>');
-      addLine('<span class="t-dim">Hack what? You\'re the AI Security Engineer here.</span>');
-      addEmpty();
+  for (const part of tail) {
+    if (part === ".") continue;
+    if (part === "..") {
+      result.pop();
+      continue;
     }
-  }, 280);
-},
-
-sudo(args) {
-  addEmpty();
-  if (!args || args === 'su' || args === '-i') {
-    addLine('<span class="t-yellow">[sudo] password for park:</span>');
-    setTimeout(()=>{
-      addLine('<span class="t-red">Sorry, user park is not in the sudoers file. This incident will be reported.</span>');
-      addEmpty();
-    }, 800);
-  } else if (args === 'rm -rf /') {
-    addLine('<span class="t-red">Permission denied.</span>');
-    addLine('<span class="t-dim">Nice try. SELinux blocked that in 0.001ms.</span>');
-    addEmpty();
-  } else {
-    addLine('<span class="t-yellow">[sudo] password for park:</span>');
-    setTimeout(()=>{
-      addLine('<span class="t-dim">Command executed with elevated privileges.</span>');
-      addEmpty();
-    }, 800);
+    result.push(part);
   }
-},
 
-cat(args) {
-  if (!args) { addLine('<span class="t-red">usage: cat &lt;file&gt;</span>'); return; }
-  const a = args.toLowerCase().replace(/['"]/g,'');
-  if (a.includes('about'))   { CMDS.about(); }
-  else if (a.includes('skill'))  { CMDS.skills(); }
-  else if (a.includes('contact')){ CMDS.contact(); }
-  else if (a.includes('resume') || a.includes('pdf')){ CMDS.resume(); }
-  else if (a.includes('id_rsa') || a.includes('secret') || a.includes('passwd')) {
-    addLine('<span class="t-red">Permission denied: classified file</span>');
-    addLine('<span class="t-dim">Nice try though.</span>');
-    addEmpty();
-  }
-  else { addLine('<span class="t-red">cat: ' + escHtml(args) + ': No such file or directory</span>'); addEmpty(); }
-},
-
-};
-
-/* ── Execute Command ───────────────────────────── */
-function execCmd(raw) {
-  const str = raw.trim();
-  if (!str) return;
-  cmdHistory.unshift(str);
-  if (cmdHistory.length > 50) cmdHistory.pop();
-  histIdx = -1;
-
-  echoCmd(str);
-  const parts = str.split(/\s+/);
-  const cmd   = parts[0].toLowerCase();
-  const args  = parts.slice(1).join(' ');
-
-  if (CMDS[cmd]) {
-    CMDS[cmd](args);
-  } else if (cmd === 'exit' || cmd === 'logout') {
-    addLine('<span class="t-dim">logout: Session ended. Reconnecting...</span>');
-    addEmpty();
-    setTimeout(() => location.reload(), 1500);
-  } else if (cmd === 'pwd') {
-    addLine('/root'); addEmpty();
-  } else if (cmd === 'date') {
-    addLine(new Date().toString()); addEmpty();
-  } else if (cmd === 'echo') {
-    addLine('<span class="t-white">' + escHtml(args) + '</span>'); addEmpty();
-  } else if (cmd === 'uname') {
-    addLine('Linux ai-sec-ws-01 5.15.0-aisec #1 SMP x86_64 GNU/Linux'); addEmpty();
-  } else {
-    addLine('<span class="t-red">bash: ' + escHtml(cmd) + ': command not found</span>');
-    addLine('<span class="t-dim">Type "help" for available commands.</span>');
-    addEmpty();
-  }
+  return drive + "\\" + result.join("\\");
 }
 
-/* ── Keyboard Handler ──────────────────────────── */
-document.addEventListener('keydown', e => {
-  if (!bootDone) return;
-  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-    inputBuffer += e.key;
-    typedEl.textContent = inputBuffer;
-  } else if (e.key === 'Backspace') {
-    inputBuffer = inputBuffer.slice(0,-1);
-    typedEl.textContent = inputBuffer;
-  } else if (e.key === 'Enter') {
-    execCmd(inputBuffer);
-    inputBuffer = '';
-    typedEl.textContent = '';
-  } else if (e.key === 'ArrowUp') {
-    if (histIdx < cmdHistory.length - 1) {
-      histIdx++;
-      inputBuffer = cmdHistory[histIdx];
-      typedEl.textContent = inputBuffer;
-    }
-  } else if (e.key === 'ArrowDown') {
-    if (histIdx > 0) {
-      histIdx--;
-      inputBuffer = cmdHistory[histIdx];
-      typedEl.textContent = inputBuffer;
-    } else {
-      histIdx = -1; inputBuffer = '';
-      typedEl.textContent = '';
-    }
-  } else if (e.key === 'Tab') {
-    e.preventDefault();
-    const cmds = Object.keys(CMDS);
-    const match = cmds.find(c => c.startsWith(inputBuffer));
-    if (match) { inputBuffer = match; typedEl.textContent = inputBuffer; }
-  } else if (e.key === 'l' && e.ctrlKey) {
-    CMDS.clear();
-  }
+function getEntry(path) {
+  const normalized = path.endsWith("\\") && path.length > 3 ? path.slice(0, -1) : path;
+  return files[normalized];
+}
+
+function openViewer(entryPath, entry) {
+  viewerTitle.textContent = entryPath;
+  viewerContent.innerHTML = entry.content;
+  viewer.classList.add("open");
+}
+
+viewerClose.addEventListener("click", () => {
+  viewer.classList.remove("open");
 });
 
-/* ── Start Terminal (after boot) ───────────────── */
-function startTerminal() {
-  // Welcome banner
-  addLine('<span class="t-bright">  ██████╗ ███████╗ ██████╗     ███████╗███████╗ ██████╗</span>');
-  addLine('<span class="t-bright">  ██╔══██╗██╔════╝██╔════╝     ██╔════╝██╔════╝██╔════╝</span>');
-  addLine('<span class="t-green">  ███████║███████╗██║          ███████╗█████╗  ██║     </span>');
-  addLine('<span class="t-green">  ██╔══██║╚════██║██║          ╚════██║██╔══╝  ██║     </span>');
-  addLine('<span class="t-dim">  ██║  ██║███████║╚██████╗     ███████║███████╗╚██████╗</span>');
-  addLine('<span class="t-dim">  ╚═╝  ╚═╝╚══════╝ ╚═════╝     ╚══════╝╚══════╝ ╚═════╝</span>');
-  addEmpty();
-  addLine('<span class="t-cyan">  AI Security Solutions Developer  ·  Park Seongho (박성호)</span>');
-  addLine('<span class="t-dim">  ──────────────────────────────────────────────────────────</span>');
-  addLine('<span class="t-dim">  Type </span><span class="t-yellow">help</span><span class="t-dim"> for available commands  ·  Tab for autocomplete  ·  ↑↓ for history</span>');
-  addEmpty();
-  // Auto-run whoami after 0.5s
-  setTimeout(() => {
-    addLine('<span class="t-cyan">root@ai-sec:~$</span> <span class="t-green">whoami</span>');
-    CMDS.about();
-  }, 500);
-}
-
-/* ══ Dashboard Live Updates ══════════════════════ */
-function randBetween(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
-
-function updateDash() {
-  // CPU
-  const cpu = randBetween(28, 78);
-  document.getElementById('d-cpu').style.width = cpu + '%';
-  document.getElementById('d-cpu-t').textContent = cpu + '%';
-  // RAM
-  const ram = randBetween(55, 80);
-  document.getElementById('d-ram').style.width = ram + '%';
-  document.getElementById('d-ram-t').textContent = ram + '%';
-  // NET
-  const net = randBetween(10, 55);
-  document.getElementById('d-net').style.width = net + '%';
-  document.getElementById('d-net-t').textContent = net + '%';
-  // Blocked counter
-  const blk = parseInt(document.getElementById('d-blocked').textContent) + (Math.random() > 0.7 ? 1 : 0);
-  document.getElementById('d-blocked').textContent = blk;
-  // Scan ago
-  const secs = randBetween(10, 180);
-  document.getElementById('d-scan-ago').textContent = secs < 60 ? secs + 's ago' : Math.floor(secs/60) + 'm ago';
-  // Network bytes
-  const bw = (Math.random() * 5 + 0.5).toFixed(1);
-  document.getElementById('conn-bytes').textContent = bw + ' MB/s';
-}
-setInterval(updateDash, 3000);
-
-/* ══ Log Feed ════════════════════════════════════ */
-const LOG_POOL = [
-  {c:'log-info', t:'[INFO] TLS handshake completed: 10.0.0.34:443'},
-  {c:'log-ok',   t:'[OK  ] adversarial_det_v4: inference 2.1ms'},
-  {c:'log-warn', t:'[WARN] Anomalous request pattern: /api/v1/predict (score: 0.73)'},
-  {c:'log-info', t:'[INFO] IDS rule updated: ET-POLICY-20241'},
-  {c:'log-ok',   t:'[OK  ] Signature DB sync: +12 new IOCs'},
-  {c:'log-warn', t:'[WARN] Rate limit applied: 192.168.1.200 (142 req/s)'},
-  {c:'log-info', t:'[INFO] ML model heartbeat: all 4 models healthy'},
-  {c:'log-err',  t:'[ERR ] Blocked SQL injection: 45.33.32.156 → /api/login'},
-  {c:'log-ai',   t:'[AI  ] Adversarial input detected — confidence 98.7%'},
-  {c:'log-ok',   t:'[OK  ] Certificate renewed: *.aisec.local (365d)'},
-  {c:'log-info', t:'[INFO] Threat intel sync: +247 IOCs processed'},
-  {c:'log-warn', t:'[WARN] Unusual entropy in input vector #8847'},
-  {c:'log-ai',   t:'[AI  ] LLM guard: prompt injection attempt blocked'},
-  {c:'log-ok',   t:'[OK  ] CVE-2024-1234 patched: kernel update applied'},
-  {c:'log-info', t:'[INFO] SSH login: root@10.0.0.12 (key auth)'},
-  {c:'log-err',  t:'[ERR ] Blocked: XSS attempt from 104.21.14.88'},
-  {c:'log-ai',   t:'[AI  ] Anomaly score: 0.12 (normal baseline)'},
-  {c:'log-info', t:'[INFO] Backup completed: /var/models → S3 (2.3GB)'},
-  {c:'log-ok',   t:'[OK  ] Security audit passed: 247/247 checks'},
-  {c:'log-warn', t:'[WARN] High memory pressure: adversarial_det_v4 (4.2GB)'},
-];
-const logFeed = document.getElementById('log-feed');
-let logIdx = 0;
-
-function addLog() {
-  const entry = LOG_POOL[logIdx % LOG_POOL.length];
-  logIdx++;
-  const d = document.createElement('div');
-  d.className = 'log-entry ' + entry.c;
-  const now = new Date();
-  const ts = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
-  d.textContent = ts + ' ' + entry.t;
-  logFeed.appendChild(d);
-  // Keep only last 40 entries
-  while (logFeed.children.length > 40) logFeed.removeChild(logFeed.firstChild);
-  logFeed.scrollTop = logFeed.scrollHeight;
-}
-
-// Seed initial logs
-for (let i = 0; i < 12; i++) addLog();
-setInterval(addLog, randBetween(1500, 4000));
-
-/* ══ Occasional Glitch Effect ════════════════════ */
-setInterval(() => {
-  if (Math.random() > 0.85) {
-    document.body.classList.add('glitch');
-    setTimeout(() => document.body.classList.remove('glitch'), 150);
+const commands = {
+  help() {
+    addLine("ls  cd  cat  pwd  whoami  clear  help");
+  },
+  ls(args) {
+    const targetPath = resolvePath(args || ".");
+    const entry = getEntry(targetPath);
+    if (!entry || entry.type !== "dir") {
+      addLine("File Not Found");
+      return;
+    }
+    addLine(entry.children.join("    "));
+  },
+  cd(args) {
+    const targetPath = resolvePath(args || homeDisplayPath);
+    const entry = getEntry(targetPath);
+    if (!entry || entry.type !== "dir") {
+      addLine("The system cannot find the path specified.");
+      return;
+    }
+    currentPath = targetPath;
+  },
+  cat(args) {
+    if (!args) {
+      addLine("The syntax of the command is incorrect.");
+      return;
+    }
+    const targetPath = resolvePath(args);
+    const entry = getEntry(targetPath);
+    if (!entry || entry.type !== "file") {
+      addLine("The system cannot find the file specified.");
+      return;
+    }
+    openViewer(targetPath, entry);
+    addLine("Opening " + args);
+  },
+  pwd() {
+    addLine(currentPath);
+  },
+  whoami() {
+    addLine(displayName);
+  },
+  clear() {
+    output.innerHTML = "";
   }
-}, 8000);
+};
 
+function runCommand(raw) {
+  const command = raw.trim();
+  if (!command) {
+    commitPrompt("");
+    ensurePrompt();
+    updatePrompt();
+    return;
+  }
+
+  history.unshift(command);
+  if (history.length > 40) history.pop();
+  historyIndex = -1;
+
+  commitPrompt(command);
+  const parts = command.split(/\s+/);
+  const name = parts[0].toLowerCase();
+  const args = command.slice(parts[0].length).trim();
+
+  if (commands[name]) {
+    commands[name](args);
+  } else {
+    addLine("'" + name + "' is not recognized as an internal or external command,");
+    addLine("operable program or batch file.");
+  }
+
+  ensurePrompt();
+  updatePrompt();
+}
+
+addLine("Microsoft Windows [Version 10.0.19045.6466]");
+addLine("(c) Microsoft Corporation. All rights reserved.");
+addLine("");
+ensurePrompt();
+updatePrompt();
+
+document.addEventListener("keydown", (event) => {
+  if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    buffer += event.key;
+    updateBufferView();
+    return;
+  }
+
+  if (event.key === "Backspace") {
+    buffer = buffer.slice(0, -1);
+    updateBufferView();
+    return;
+  }
+
+  if (event.key === "Enter") {
+    runCommand(buffer);
+    buffer = "";
+    updateBufferView();
+    return;
+  }
+
+  if (event.key === "ArrowUp") {
+    if (historyIndex < history.length - 1) {
+      historyIndex += 1;
+      buffer = history[historyIndex];
+      updateBufferView();
+    }
+    return;
+  }
+
+  if (event.key === "ArrowDown") {
+    if (historyIndex > 0) {
+      historyIndex -= 1;
+      buffer = history[historyIndex];
+    } else {
+      historyIndex = -1;
+      buffer = "";
+    }
+    updateBufferView();
+  }
+});
 </script>
 </body>
 </html>
