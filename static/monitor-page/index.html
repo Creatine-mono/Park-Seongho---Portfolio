@@ -93,14 +93,14 @@ body {
 
 #viewer {
   position: fixed;
-  top: 22px;
-  left: 90px;
-  width: 760px;
-  height: 560px;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: none;
-  border: 1px solid #6e6e6e;
+  border: 0;
   background: #d5d2c5;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  box-shadow: none;
   color: #1d1d1d;
   z-index: 900;
   cursor: default;
@@ -144,6 +144,18 @@ body {
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.55), transparent 35%),
     linear-gradient(180deg, #efede3 0%, #e3e0d2 100%);
   font-family: "Times New Roman", serif;
+}
+
+#viewer-content.pdf-viewer {
+  padding: 0;
+  background: #bdb8a8;
+}
+
+#viewer-content.pdf-viewer iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #8b8b8b;
 }
 
 #viewer-content::-webkit-scrollbar {
@@ -231,6 +243,64 @@ body {
   border: 1px solid rgba(20, 20, 20, 0.25);
   background: rgba(255, 255, 255, 0.35);
 }
+
+.doc-meta {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #444;
+}
+
+.doc-kv {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.doc-kv div strong {
+  display: inline-block;
+  width: 100px;
+}
+
+.doc-link {
+  color: #4b4fa8;
+  text-decoration: underline;
+}
+
+.doc-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+}
+
+.doc-banner-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(20, 20, 20, 0.35);
+  background: rgba(255, 255, 255, 0.4);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+
+.doc-image {
+  width: 100%;
+  margin-top: 18px;
+  border: 1px solid rgba(20, 20, 20, 0.25);
+  display: block;
+}
+
+.doc-project-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.doc-project-sub {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #555;
+}
 </style>
 </head>
 <body>
@@ -290,13 +360,13 @@ let activePromptInput = null;
 let currentPath = homeDisplayPath;
 
 const files = {
+  "C:\\": { type: "dir", children: ["Users"] },
   "C:\\Users": { type: "dir", children: [displayName] },
-  [homeDisplayPath]: { type: "dir", children: ["about", "projects", "contact", "resume"] },
-  [homeDisplayPath + "\\about"]: { type: "dir", children: ["profile.txt", "skills.txt", "experience.txt"] },
-  [homeDisplayPath + "\\projects"]: { type: "dir", children: ["adversarial_ml.txt", "llm_scanner.txt", "intrusion_detection.txt"] },
+  [homeDisplayPath]: { type: "dir", children: ["profile", "contact", "resume"] },
+  [homeDisplayPath + "\\profile"]: { type: "dir", children: ["profile.txt"] },
   [homeDisplayPath + "\\contact"]: { type: "dir", children: ["contact.txt"] },
-  [homeDisplayPath + "\\resume"]: { type: "dir", children: ["resume.txt"] },
-  [homeDisplayPath + "\\about\\profile.txt"]: {
+  [homeDisplayPath + "\\resume"]: { type: "dir", children: ["resume.txt", "resume.pdf"] },
+  [homeDisplayPath + "\\profile\\profile.txt"]: {
     type: "file",
     title: "Profile",
     content: `
@@ -306,113 +376,48 @@ const files = {
             <div class="doc-brand">Park<br>Seongho<small>Portfolio '26</small></div>
             <div class="doc-nav">
               <span>HOME</span>
-              <span>ABOUT</span>
-              <span>EXPERIENCE</span>
-              <span>PROJECTS</span>
+              <span>PROFILE</span>
               <span>CONTACT</span>
+              <span>RESUME</span>
             </div>
           </div>
           <div>
             <div class="doc-title">Welcome</div>
             <div class="doc-subtitle">I'm Park Seongho</div>
             <div class="doc-copy">
-              I build AI security systems, red-team LLM applications, and review model risk in production environments.
-              This portfolio is presented as a terminal-driven workspace, but the document viewer opens a cleaner summary
-              when you inspect files with <strong>cat</strong>.
+              I am focused on AI security and product-oriented security engineering. My work centers on LLM application
+              security, adversarial machine learning, and building systems that are clear to review and practical to operate.
+            </div>
+            <div class="doc-copy">
+              Thank you for taking the time to look through this portfolio. I wanted the experience to feel like opening a
+              workstation, moving through folders, and reading documents directly rather than clicking through generic cards.
+              If you would like to contact me, open the <span class="doc-link">contact</span> folder, or view the original
+              resume file in the <span class="doc-link">resume</span> folder.
+            </div>
+            <div class="doc-divider"></div>
+            <div class="doc-banner">
+              <div class="doc-banner-icon">+</div>
+              <div>
+                <div class="doc-section-title" style="margin:0;">Looking for my resume?</div>
+                <div class="doc-meta">Open <strong>resume\\resume.pdf</strong> with <strong>cat</strong> to view the full file.</div>
+              </div>
             </div>
             <div class="doc-divider"></div>
             <div class="doc-section-title">About Me</div>
-            <div class="doc-copy">
-              My focus is practical AI security: prompt injection defense, model robustness evaluation, and threat modeling
-              for products that actually ship. I prefer systems that feel operational, not decorative.
+            <div class="doc-kv">
+              <div><strong>Role</strong> AI Security Engineer</div>
+              <div><strong>Focus</strong> LLM Security, Adversarial ML, Product Security</div>
+              <div><strong>Location</strong> Seoul, South Korea</div>
+              <div><strong>Style</strong> Terminal-first, implementation-oriented, review-driven</div>
             </div>
+            <div class="doc-copy">
+              My interest in security comes from wanting to understand how systems actually fail in practice. That led me
+              toward AI security, where model behavior, application logic, and product constraints all interact. I enjoy
+              work that sits between research and implementation: reviewing attack surfaces, testing assumptions, and
+              turning findings into something a team can maintain.
+            </div>
+            <img class="doc-image" src="/images/preview-image.jpg" alt="Park Seongho profile image">
           </div>
-        </div>
-      </div>
-    `
-  },
-  [homeDisplayPath + "\\about\\skills.txt"]: {
-    type: "file",
-    title: "Skills",
-    content: `
-      <div class="doc-shell">
-        <div class="doc-title" style="font-size:46px;">Skills</div>
-        <div class="doc-subtitle">Core Areas</div>
-        <div class="doc-divider"></div>
-        <div class="doc-card">
-          <div class="doc-section-title">AI Security</div>
-          <ul class="doc-list">
-            <li>LLM prompt injection analysis</li>
-            <li>Adversarial machine learning</li>
-            <li>Model robustness testing</li>
-            <li>Threat modeling for AI applications</li>
-          </ul>
-        </div>
-        <div class="doc-card">
-          <div class="doc-section-title">Engineering</div>
-          <ul class="doc-list">
-            <li>Python, TypeScript, PyTorch, TensorFlow</li>
-            <li>Docker, AWS, API security, monitoring</li>
-            <li>Terminal-first workflows and review tooling</li>
-          </ul>
-        </div>
-      </div>
-    `
-  },
-  [homeDisplayPath + "\\about\\experience.txt"]: {
-    type: "file",
-    title: "Experience",
-    content: `
-      <div class="doc-shell">
-        <div class="doc-title" style="font-size:46px;">Experience</div>
-        <div class="doc-divider"></div>
-        <div class="doc-card">
-          <div class="doc-section-title">AI Security Engineer</div>
-          <div class="doc-copy">Security reviews, prompt-injection evaluation, red-teaming, and applied hardening for LLM products.</div>
-        </div>
-        <div class="doc-card">
-          <div class="doc-section-title">Security Research</div>
-          <div class="doc-copy">Research on adversarial ML, system misuse paths, and operational defenses for model-serving infrastructure.</div>
-        </div>
-      </div>
-    `
-  },
-  [homeDisplayPath + "\\projects\\adversarial_ml.txt"]: {
-    type: "file",
-    title: "Adversarial ML Defense Framework",
-    content: `
-      <div class="doc-shell">
-        <div class="doc-title" style="font-size:40px;">Adversarial ML Defense Framework</div>
-        <div class="doc-divider"></div>
-        <div class="doc-copy">
-          Toolkit for evaluating and hardening models under adversarial pressure. Includes attack simulation,
-          test reporting, and mitigation validation.
-        </div>
-      </div>
-    `
-  },
-  [homeDisplayPath + "\\projects\\llm_scanner.txt"]: {
-    type: "file",
-    title: "LLM Prompt Injection Scanner",
-    content: `
-      <div class="doc-shell">
-        <div class="doc-title" style="font-size:40px;">LLM Prompt Injection Scanner</div>
-        <div class="doc-divider"></div>
-        <div class="doc-copy">
-          Scanner focused on jailbreaks, prompt overrides, and data exfiltration patterns in LLM-based products.
-        </div>
-      </div>
-    `
-  },
-  [homeDisplayPath + "\\projects\\intrusion_detection.txt"]: {
-    type: "file",
-    title: "AI-Powered Intrusion Detection",
-    content: `
-      <div class="doc-shell">
-        <div class="doc-title" style="font-size:40px;">AI-Powered Intrusion Detection</div>
-        <div class="doc-divider"></div>
-        <div class="doc-copy">
-          Detection pipeline that combines anomaly scoring with operator-friendly triage for security events.
         </div>
       </div>
     `
@@ -424,9 +429,17 @@ const files = {
       <div class="doc-shell">
         <div class="doc-title" style="font-size:40px;">Contact</div>
         <div class="doc-divider"></div>
-        <div class="doc-copy">Email: psh243360@gmail.com</div>
-        <div class="doc-copy">GitHub: github.com/Park-Seongho</div>
-        <div class="doc-copy">LinkedIn: linkedin.com/in/parkseongho</div>
+        <div class="doc-copy">
+          If you want to discuss AI security, product hardening, or portfolio work, the fastest route is email.
+        </div>
+        <div class="doc-card">
+          <div class="doc-kv">
+            <div><strong>Email</strong> psh243360@gmail.com</div>
+            <div><strong>GitHub</strong> github.com/Park-Seongho</div>
+            <div><strong>LinkedIn</strong> linkedin.com/in/parkseongho</div>
+            <div><strong>Location</strong> Seoul, South Korea</div>
+          </div>
+        </div>
       </div>
     `
   },
@@ -439,8 +452,14 @@ const files = {
         <div class="doc-divider"></div>
         <div class="doc-copy">AI Security Engineer based in Seoul.</div>
         <div class="doc-copy">Focus on LLM security, adversarial ML, and practical product defense.</div>
+        <div class="doc-copy">For the original resume file, run <strong>cat resume.pdf</strong>.</div>
       </div>
     `
+  },
+  [homeDisplayPath + "\\resume\\resume.pdf"]: {
+    type: "pdf",
+    title: "Resume PDF",
+    src: "/docs/resume.pdf"
   }
 };
 
@@ -505,7 +524,7 @@ function normalizePath(path) {
 }
 
 function resolvePath(input) {
-  const target = (input || "").trim();
+  const target = normalizePath((input || "").trim());
   if (!target) return currentPath;
 
   let working;
@@ -533,7 +552,7 @@ function resolvePath(input) {
     result.push(part);
   }
 
-  return drive + "\\" + result.join("\\");
+  return result.length ? drive + "\\" + result.join("\\") : drive + "\\";
 }
 
 function getEntry(path) {
@@ -543,7 +562,15 @@ function getEntry(path) {
 
 function openViewer(entryPath, entry) {
   viewerTitle.textContent = entryPath;
-  viewerContent.innerHTML = entry.content;
+  viewerContent.classList.remove("pdf-viewer");
+
+  if (entry.type === "pdf") {
+    viewerContent.classList.add("pdf-viewer");
+    viewerContent.innerHTML = '<iframe src="' + entry.src + '"></iframe>';
+  } else {
+    viewerContent.innerHTML = entry.content;
+  }
+
   viewer.classList.add("open");
 }
 
@@ -580,7 +607,7 @@ const commands = {
     }
     const targetPath = resolvePath(args);
     const entry = getEntry(targetPath);
-    if (!entry || entry.type !== "file") {
+    if (!entry || (entry.type !== "file" && entry.type !== "pdf")) {
       addLine("The system cannot find the file specified.");
       return;
     }
