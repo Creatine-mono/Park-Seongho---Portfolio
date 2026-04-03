@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1024">
+<title>Portfolio Terminal</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  background: #000;
+  color: #f2f2f2;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  cursor: none;
+}
+#cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  z-index: 1000;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.6));
+}
+#terminal { width: 100%; height: 100%; padding: 18px 20px; }
+#output {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+#output::-webkit-scrollbar { width: 6px; }
+#output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
+.line, .prompt-line { min-height: 1.55em; }
+.prompt-label, .prompt-input { white-space: pre; }
+.dim { color: #bdbdbd; }
+.caret {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  vertical-align: text-bottom;
+  background: #f2f2f2;
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+
+#viewer {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background: #d5d2c5;
+  color: #1d1d1d;
+  z-index: 900;
+  cursor: default;
+}
+#viewer.open { display: block; }
+#viewer.windowed {
+  top: 18px;
+  left: 34px;
+  width: calc(100vw - 68px);
+  height: calc(100vh - 36px);
+  border: 1px solid #6e6e6e;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+#viewer-titlebar {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  background: linear-gradient(180deg, #2840b7 0%, #1f3197 100%);
+  color: #fff;
+  font: 700 12px Tahoma, sans-serif;
+}
+#viewer-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#viewer-actions { display: flex; gap: 4px; }
+#viewer-toggle, #viewer-close {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255,255,255,0.7);
+  background: #d8d8d8;
+  color: #000;
+  font: 700 11px Tahoma, sans-serif;
+}
+#viewer-content {
+  height: calc(100% - 28px);
+  overflow: auto;
+  padding: 22px 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.55), transparent 35%),
+    linear-gradient(180deg, #efede3 0%, #e3e0d2 100%);
+  font-family: "Times New Roman", serif;
+}
+#viewer-content::-webkit-scrollbar { width: 12px; }
+#viewer-content::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+  border: 2px solid #e5e5e5;
+}
+#viewer-content.pdf-viewer { padding: 0; background: #bdb8a8; }
+#viewer-content.pdf-viewer iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #8b8b8b;
+}
+
+.doc-shell { min-height: 100%; }
+.doc-header {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.doc-brand {
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.05;
+}
+.doc-brand small {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+}
+.doc-title {
+  font-size: 52px;
+  line-height: 0.95;
+  font-weight: 700;
+}
+.doc-subtitle {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.doc-copy {
+  margin-top: 18px;
+  font-size: 16px;
+  line-height: 1.62;
+}
+.doc-divider {
+  margin: 34px 0 24px;
+  border-top: 2px solid rgba(20,20,20,0.6);
+}
+.doc-nav {
+  display: grid;
+  gap: 8px;
+  width: 170px;
+  margin-top: 14px;
+  font-size: 17px;
+}
+.doc-side-link {
+  color: #2449b4;
+  text-decoration: underline;
+}
+
+.doc-side-link.current {
+  font-weight: 700;
+}
+.doc-side-link.visited, .doc-inline-link.visited {
+  color: #6a3c9b;
+}
+.doc-inline-link {
+  color: #2449b4;
+  text-decoration: underline;
+}
+.doc-section-title {
+  margin: 0 0 16px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.doc-card {
+  padding: 14px 16px;
+  margin: 12px 0;
+  border: 1px solid rgba(20,20,20,0.25);
+  background: rgba(255,255,255,0.35);
+}
+.doc-meta {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #444;
+}
+.doc-kv {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 16px;
+}
+.doc-kv div strong {
+  display: inline-block;
+  width: 110px;
+}
+.doc-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+}
+.doc-banner-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(20,20,20,0.35);
+  background: rgba(255,255,255,0.4);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+.doc-image {
+  width: 78%;
+  margin-top: 18px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid rgba(20,20,20,0.25);
+  display: block;
+}
+
+.doc-image.about-image {
+  width: 100%;
+}
+.doc-about-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 34px;
+  align-items: center;
+  margin-top: 22px;
+}
+.doc-about-photo {
+  width: 100%;
+  margin: 0;
+  border: 1px solid rgba(20,20,20,0.2);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+}
+.doc-about-copy .doc-copy:first-child {
+  margin-top: 0;
+}
+.doc-about-kicker {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.doc-about-greeting {
+  margin-top: 14px;
+  font-size: 34px;
+  font-weight: 700;
+}
+.doc-button-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.doc-button {
+  display: inline-block;
+  padding: 11px 18px;
+  border: 1px solid rgba(20,20,20,0.35);
+  background: rgba(255,255,255,0.72);
+  color: #2449b4;
+  text-decoration: underline;
+  font-size: 15px;
+  font-weight: 700;
+}
+.doc-button.visited {
+  color: #6a3c9b;
+}
+.doc-about-photo-wrap {
+  display: flex;
+  justify-content: flex-end;
+}
+.doc-about-panel {
+  padding: 20px 22px;
+  border: 1px solid rgba(20,20,20,0.18);
+  background: rgba(255,255,255,0.3);
+}
+.doc-about-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  column-gap: 18px;
+  row-gap: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.doc-about-label {
+  font-weight: 700;
+}
+.doc-project-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+.doc-project-sub {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #555;
+}
+.doc-awards {
+  display: grid;
+  gap: 16px;
+  margin-top: 14px;
+}
+.doc-awards img {
+  width: 100%;
+  display: block;
+  border: 1px solid rgba(20,20,20,0.22);
+}
+
+.doc-awards img.award-half {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.contact-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(20,20,20,0.35);
+  background: rgba(255,255,255,0.72);
+  color: #111;
+  font: 15px "Times New Roman", serif;
+}
+.contact-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+.contact-form button {
+  width: 180px;
+  padding: 9px 12px;
+  border: 1px solid rgba(20,20,20,0.45);
+  background: #ece8da;
+  font: 700 14px Tahoma, sans-serif;
+}
+.contact-status {
+  min-height: 20px;
+  font-size: 14px;
+  color: #333;
+}
+</style>
+</head>
+<body>
+<svg id="cursor" viewBox="0 0 16 16" fill="none">
+  <line x1="8" y1="0" x2="8" y2="6" stroke="#ffffff" stroke-width="1.1"></line>
+  <line x1="8" y1="10" x2="8" y2="16" stroke="#ffffff" stroke-width="1.1"></line>
+  <line x1="0" y1="8" x2="6" y2="8" stroke="#ffffff" stroke-width="1.1"></line>
+  <line x1="10" y1="8" x2="16" y2="8" stroke="#ffffff" stroke-width="1.1"></line>
+</svg>
+
+<div id="terminal"><div id="output"></div></div>
+
+<div id="viewer">
+  <div id="viewer-titlebar">
+    <div id="viewer-title">viewer</div>
+    <div id="viewer-actions">
+      <button id="viewer-toggle" type="button">[]</button>
+      <button id="viewer-close" type="button">X</button>
+    </div>
+  </div>
+  <div id="viewer-content"></div>
+</div>
+
+<script>
+const displayName = "\uBC15\uC131\uD638_\uD3EC\uD2B8\uD3F4\uB9AC\uC624";
+const homeDisplayPath = "C:\\Users\\" + displayName;
+const visitedDocs = new Set();
+
+const cursor = document.getElementById("cursor");
+document.addEventListener("mousemove", (event) => {
+  cursor.style.left = (event.clientX - 8) + "px";
+  cursor.style.top = (event.clientY - 8) + "px";
+  window.parent.postMessage({ type: "mousemove", clientX: event.clientX, clientY: event.clientY }, "*");
+});
+["mousedown", "mouseup"].forEach((type) => {
+  document.addEventListener(type, (event) => {
+    window.parent.postMessage({ type, clientX: event.clientX, clientY: event.clientY }, "*");
+  });
+});
+["keydown", "keyup"].forEach((type) => {
+  document.addEventListener(type, (event) => {
+    window.parent.postMessage({ type, key: event.key }, "*");
+  });
+});
+
+const output = document.getElementById("output");
+const viewer = document.getElementById("viewer");
+const viewerTitle = document.getElementById("viewer-title");
+const viewerContent = document.getElementById("viewer-content");
+const viewerClose = document.getElementById("viewer-close");
+const viewerToggle = document.getElementById("viewer-toggle");
+
+let buffer = "";
+let history = [];
+let historyIndex = -1;
+let activePromptLine = null;
+let activePromptInput = null;
+let currentPath = homeDisplayPath;
+
+function sidebarHtml(active) {
+  const links = [
+    ["profile\\about.txt", "ABOUT", "about.txt"],
+    ["profile\\experience.txt", "EXPERIENCE", "experience.txt"],
+    ["profile\\projects.txt", "PROJECTS", "projects.txt"],
+    ["contact\\contact_page.txt", "CONTACT", "contact_page.txt"],
+    ["profile\\awards.txt", "AWARDS", "awards.txt"],
+    ["profile\\skills.txt", "SKILLS", "skills.txt"],
+    ["profile\\certifications.txt", "CERTIFICATIONS", "certifications.txt"],
+    ["profile\\activities.txt", "ACTIVITIES", "activities.txt"],
+    ["profile\\languages.txt", "LANGUAGES", "languages.txt"]
+  ];
+
+  return `
+    <div class="doc-brand">Park<br>Seongho<small>Portfolio '26</small></div>
+    <div class="doc-nav">
+      ${links.map(([path, label, docKey]) => {
+        const classes = ["doc-side-link"];
+        if (visitedDocs.has(docKey)) classes.push("visited");
+        if (active === docKey) classes.push("current");
+        return `<a href="#" class="${classes.join(" ")}" data-open-file="${path}" data-doc="${docKey}">${label}</a>`;
+      }).join("")}
+    </div>
+  `;
+}
+
+function pageShell(title, subtitle, body, active) {
+  return `
+    <div class="doc-shell">
+      <div class="doc-header">
+        <div>${sidebarHtml(active)}</div>
+        <div>
+          <div class="doc-title">${title}</div>
+          ${subtitle ? `<div class="doc-subtitle">${subtitle}</div>` : ""}
+          ${body}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+const aboutBody = `
+  <div class="doc-about-layout">
+    <div class="doc-about-copy">
+      <div class="doc-about-kicker">Building practical AI systems for security, privacy, and real-world use.</div>
+      <div class="doc-about-greeting">Hello, I'm Park Seongho.</div>
+      <div class="doc-copy">
+        I'm an AI engineer with bright energy, strong discipline, and a genuine passion for turning new technologies into real, working systems.
+      </div>
+      <div class="doc-copy">
+        I am deeply interested in solving real-world security problems with AI. Through projects such as a privacy detection system,
+        document security classification, and AI agent development, I have experienced the full workflow myself, from data collection
+        and preprocessing to model training, deployment, and frontend implementation.
+      </div>
+      <div class="doc-copy">
+        Rather than staying within a single technical area, I am growing as an engineer who combines machine learning, LLMs,
+        data processing, and service implementation to build practical systems that can be applied in real environments.
+      </div>
+      <div class="doc-button-row">
+        <a href="#" class="doc-button" data-open-file="resume\\resume.pdf" data-doc="resume.pdf">Resume</a>
+        <a href="https://github.com/Creatine-mono" class="doc-button" target="_blank" rel="noopener noreferrer" data-doc="about-github-link">GitHub</a>
+        <a href="https://huggingface.co/psh3333" class="doc-button" target="_blank" rel="noopener noreferrer" data-doc="about-huggingface-link">HuggingFace</a>
+      </div>
+    </div>
+    <div class="doc-about-photo-wrap">
+      <img class="doc-image about-image doc-about-photo" src="/profile/profile-photo.jpg" alt="">
+    </div>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-section-title">About Me</div>
+  <div class="doc-about-panel">
+    <div class="doc-about-grid">
+      <div class="doc-about-label">Name</div>
+      <div>Park Seongho</div>
+      <div class="doc-about-label">Role</div>
+      <div>AI Engineer / AI Security Engineer</div>
+      <div class="doc-about-label">Focus</div>
+      <div>AI Security, Privacy Detection, Machine Learning, LLM Applications</div>
+      <div class="doc-about-label">Education</div>
+      <div>Korea University, Artificial Intelligence Cybersecurity</div>
+      <div class="doc-about-label">Status</div>
+      <div>Senior, Expected Graduation 2027</div>
+      <div class="doc-about-label">School Year</div>
+      <div>4th Year Undergraduate</div>
+      <div class="doc-about-label">Location</div>
+      <div>South Korea</div>
+      <div class="doc-about-label">Email</div>
+      <div>psh243360@gmail.com</div>
+      <div class="doc-about-label">GitHub</div>
+      <div><a href="https://github.com/Creatine-mono" class="doc-inline-link" target="_blank" rel="noopener noreferrer" data-doc="about-github-link">https://github.com/Creatine-mono</a></div>
+    </div>
+  </div>
+`;
+
+const experienceBody = `
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:24px;">MarkAny Inc.</div>
+    <div class="doc-project-sub">AI Security Intern | Jan 2026 - Feb 2026</div>
+    <div class="doc-copy">
+      Joined MarkAny as a scouted intern and worked on AI security-related projects. Conducted a proof-of-concept for
+      automatic document security classification based on National Intelligence Service CSO criteria.
+    </div>
+    <div class="doc-copy">
+      Built and validated a document classification pipeline for internal documents across Confidential, Sensitive, and Public
+      security levels. Applied LLM-based data augmentation, fine-tuning, and evaluation strategies to improve performance.
+    </div>
+  </div>
+`;
+
+const projectsBody = `
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:24px;">Korean Privacy Detection System</div>
+    <div class="doc-project-sub">Tech Lead / AI Engineer / Frontend Developer | Jul 2025 - Nov 2025</div>
+    <div class="doc-meta"><a href="https://github.com/Creatine-mono/kisia-project" class="doc-inline-link" target="_blank" rel="noopener noreferrer" data-doc="kisia-project-link">GitHub Repository</a></div>
+    <div class="doc-copy">
+      Led the development of a Korean privacy detection system and took ownership of both AI modeling and frontend implementation.
+      Built the full AI pipeline from data collection and preprocessing to model training and Hugging Face deployment.
+    </div>
+    <div class="doc-copy">
+      Designed and implemented the frontend, dashboard, data visualization features, and user interface. Achieved 93% F1 on
+      regex-hard entities and maintained less than 1%p gap between overall F1 and regex-hard F1.
+    </div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:24px;">SBOM AI Agent</div>
+    <div class="doc-project-sub">Team Lead | Sep 2025 - Nov 2025</div>
+    <div class="doc-meta"><a href="https://github.com/Creatine-mono/system_security_project" class="doc-inline-link" target="_blank" rel="noopener noreferrer" data-doc="sbom-project-link">GitHub Repository</a></div>
+    <div class="doc-copy">
+      Led the overall development of an SBOM-based AI agent project. Directed team meetings, coordinated project progress,
+      and managed implementation flow.
+    </div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:24px;">Document Security Classification</div>
+    <div class="doc-project-sub">AI Security Intern / AI Engineer, MarkAny Inc. | Jan 2026 - Feb 2026</div>
+    <div class="doc-meta"><a href="https://github.com/Creatine-mono/Document-classification-CSO" class="doc-inline-link" target="_blank" rel="noopener noreferrer" data-doc="document-classification-link">GitHub Repository</a></div>
+    <div class="doc-copy">
+      Built a deep learning-based classification model to categorize internal documents into Confidential, Sensitive, and Public
+      levels. Achieved 96% accuracy and 97% average F1-score on evaluation data.
+    </div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:24px;">TSUM AI Lecture and Project</div>
+    <div class="doc-project-sub">Mentor | Mar 2026 - Jun 2026</div>
+    <div class="doc-copy">
+      Participated as a mentor in AI lectures and project-based learning activities.
+      Supported learners in understanding AI development and project execution.
+    </div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:24px;">Life Managers</div>
+    <div class="doc-project-sub">Co-founder / LLM Technical Advisor | 2026 - Present</div>
+    <div class="doc-copy">
+      Co-founded a startup project focused on building an AI assistant for socially isolated young adults.
+      Contributed to LLM development, technical planning, and AI service advisory.
+    </div>
+  </div>
+`;
+
+const contactBody = `
+  <div class="doc-copy">You can contact me directly by email or use the built-in form below.</div>
+  <div class="doc-kv">
+    <div><strong>Email</strong> psh243360@gmail.com</div>
+    <div><strong>GitHub</strong> https://github.com/Creatine-mono</div>
+  </div>
+  <form class="contact-form" id="contact-form">
+    <input type="text" name="name" placeholder="Your name" required>
+    <input type="text" name="company" placeholder="Company / Team">
+    <input type="email" name="email" placeholder="Your email" required>
+    <textarea name="message" placeholder="Message" required></textarea>
+    <button type="submit">Send Message</button>
+    <div class="contact-status" id="contact-status"></div>
+  </form>
+`;
+
+const awardsBody = `
+  <div class="doc-awards">
+    <div class="doc-card">
+      <div class="doc-project-title" style="font-size:22px;">3rd KISIA Information Security Developer Hackathon</div>
+      <div class="doc-project-sub">Excellence Award</div>
+      <img src="/profile/awards/KakaoTalk_20260311_233842735.png" alt="">
+    </div>
+    <div class="doc-card">
+      <div class="doc-project-title" style="font-size:22px;">KISIA AI Security Privacy Track Project</div>
+      <div class="doc-project-sub">Best Team Award</div>
+      <img class="award-half" src="/profile/awards/KakaoTalk_20260311_233842735_01.jpg" alt="">
+    </div>
+  </div>
+`;
+
+const skillsBody = `
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">Languages</div>
+    <div class="doc-copy">Python, SQL, TypeScript, JavaScript</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">AI / Machine Learning</div>
+    <div class="doc-copy">PyTorch, TensorFlow, Keras, scikit-learn, Pandas, NumPy</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">LLM / NLP</div>
+    <div class="doc-copy">Transformers, Hugging Face, LangChain, LoRA, QLoRA, PEFT, Unsloth, Prompt Engineering, RAG</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">Backend / AI Serving</div>
+    <div class="doc-copy">FastAPI, REST API, Model Fine-tuning, Inference Pipeline Design</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">Frontend</div>
+    <div class="doc-copy">React, TypeScript, Three.js, Dashboard Development, Data Visualization</div>
+  </div>
+`;
+
+const certificationsBody = `
+  <div class="doc-card"><div class="doc-project-title" style="font-size:22px;">AICE Associate</div></div>
+  <div class="doc-card"><div class="doc-project-title" style="font-size:22px;">AICE Basic</div></div>
+  <div class="doc-card"><div class="doc-project-title" style="font-size:22px;">AIDE Level 2</div></div>
+  <div class="doc-card"><div class="doc-project-title" style="font-size:22px;">AI-900</div></div>
+`;
+
+const activitiesBody = `
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">KISIA AI Security Workforce Development Program</div>
+    <div class="doc-project-sub">Jul 7, 2025 - Dec 11, 2025</div>
+    <div class="doc-copy">Participated in the Privacy Track of the KISIA AI Security Workforce Development Program and worked on AI security and privacy-focused project activities.</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">2025 Student Monitoring Corps Against Illegal Distribution of Personal Information</div>
+    <div class="doc-project-sub">Jul 18, 2025 - Dec 2025</div>
+    <div class="doc-copy">Participated as a student monitor in a government-led initiative to detect and respond to the illegal distribution of personal information online.</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">2025 7th Understanding America Academy</div>
+    <div class="doc-project-sub">Jul 7, 2025 - Jul 10, 2025</div>
+    <div class="doc-copy">Participated in the 7th Understanding America Academy program, gaining insights into U.S. society, politics, and international relations.</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">Overseas Training Program, Tokyo, Japan</div>
+    <div class="doc-project-sub">Sejong Software-Centered University Project Group | Nov 3, 2025 - Nov 8, 2025</div>
+    <div class="doc-copy">Participated in an overseas training program in Tokyo focused on global technology and industry exposure.</div>
+    <img class="doc-image about-image" src="/profile/activities/tokyo-training.jpg" alt="">
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">Building AI Agents for Your Service: RAG, LangGraph, and LLM Fine-tuning</div>
+    <div class="doc-project-sub">Feb 2026 - Mar 2026</div>
+    <div class="doc-copy">Studied how to build AI agents tailored to specific services, covering RAG, LangGraph, and LLM fine-tuning.</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">Metacode Data Engineering Bootcamp</div>
+    <div class="doc-project-sub">Mar 2026 - Jun 2026</div>
+    <div class="doc-copy">Studied practical data engineering and AI service development workflows.</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">2026 Statistical Information Service Monitor and Supporters</div>
+    <div class="doc-project-sub">Apr 2026 - Nov 2026</div>
+    <div class="doc-copy">Served as a monitor and supporter for the 2026 Statistical Information Service, contributing to service quality evaluation and user feedback.</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">LLM Fine-tuning 3-Week Workshop: From Synthetic Data Generation to Reinforcement Learning & Evaluation</div>
+    <div class="doc-project-sub">Apr 5, 2026 - Apr 19, 2026</div>
+    <div class="doc-copy">Completed a 3-week intensive workshop on LLM fine-tuning, covering synthetic data generation, reinforcement learning, and model evaluation.</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">InsighTone</div>
+    <div class="doc-project-sub">Dec 2026 - Jan 2027</div>
+    <div class="doc-copy">Worked on MVP planning and validation for a startup idea.</div>
+  </div>
+`;
+
+const languagesBody = `
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">English</div>
+    <div class="doc-copy">Advanced</div>
+    <div class="doc-meta">OPIc IH / TOEIC 860</div>
+  </div>
+  <div class="doc-card">
+    <div class="doc-project-title" style="font-size:22px;">Korean</div>
+    <div class="doc-copy">Native</div>
+  </div>
+`;
+
+const files = {
+  "C:\\": { type: "dir", children: ["Users"] },
+  "C:\\Users": { type: "dir", children: [displayName] },
+  [homeDisplayPath]: { type: "dir", children: ["profile", "contact", "resume"] },
+  [homeDisplayPath + "\\profile"]: { type: "dir", children: ["about.txt", "experience.txt", "projects.txt", "awards.txt", "skills.txt", "certifications.txt", "languages.txt"] },
+  [homeDisplayPath + "\\contact"]: { type: "dir", children: ["contact_page.txt"] },
+  [homeDisplayPath + "\\resume"]: { type: "dir", children: ["resume.pdf"] },
+  [homeDisplayPath + "\\profile\\about.txt"]: { type: "file", title: "About", content: pageShell("Welcome", "I'm Park Seongho", aboutBody, "about.txt") },
+  [homeDisplayPath + "\\profile\\experience.txt"]: { type: "file", title: "Experience", content: pageShell("Experience", "", experienceBody, "experience.txt") },
+  [homeDisplayPath + "\\profile\\projects.txt"]: { type: "file", title: "Projects", content: pageShell("Projects", "", projectsBody, "projects.txt") },
+  [homeDisplayPath + "\\profile\\awards.txt"]: { type: "file", title: "Awards", content: pageShell("Awards", "", awardsBody, "awards.txt") },
+  [homeDisplayPath + "\\profile\\skills.txt"]: { type: "file", title: "Skills", content: pageShell("Skills", "", skillsBody, "skills.txt") },
+  [homeDisplayPath + "\\profile\\certifications.txt"]: { type: "file", title: "Certifications", content: pageShell("Certifications", "", certificationsBody, "certifications.txt") },
+  [homeDisplayPath + "\\profile\\activities.txt"]: { type: "file", title: "Activities", content: pageShell("Activities", "", activitiesBody, "activities.txt") },
+  [homeDisplayPath + "\\profile\\languages.txt"]: { type: "file", title: "Languages", content: pageShell("Languages", "", languagesBody, "languages.txt") },
+  [homeDisplayPath + "\\contact\\contact_page.txt"]: { type: "file", title: "Contact", content: pageShell("Contact", "", contactBody, "contact_page.txt") },
+  [homeDisplayPath + "\\resume\\resume.pdf"]: { type: "pdf", title: "Resume PDF", src: "/docs/resume.pdf" }
+};
+
+function addLine(text, className = "") {
+  const line = document.createElement("div");
+  line.className = "line" + (className ? " " + className : "");
+  line.textContent = text;
+  output.appendChild(line);
+  output.scrollTop = output.scrollHeight;
+}
+
+function promptText() {
+  return currentPath + ">";
+}
+
+function ensurePrompt() {
+  if (activePromptLine) return;
+  activePromptLine = document.createElement("div");
+  activePromptLine.className = "prompt-line";
+  const label = document.createElement("span");
+  label.className = "prompt-label";
+  label.textContent = promptText();
+  activePromptInput = document.createElement("span");
+  activePromptInput.className = "prompt-input";
+  const caret = document.createElement("span");
+  caret.className = "caret";
+  activePromptLine.appendChild(label);
+  activePromptLine.appendChild(activePromptInput);
+  activePromptLine.appendChild(caret);
+  output.appendChild(activePromptLine);
+  output.scrollTop = output.scrollHeight;
+}
+
+function updatePrompt() {
+  if (!activePromptLine) return;
+  activePromptLine.querySelector(".prompt-label").textContent = promptText();
+}
+
+function updateBufferView() {
+  if (!activePromptInput) return;
+  activePromptInput.textContent = buffer;
+  output.scrollTop = output.scrollHeight;
+}
+
+function commitPrompt(command) {
+  if (!activePromptLine) return;
+  const line = document.createElement("div");
+  line.className = "line";
+  line.textContent = promptText() + command;
+  output.replaceChild(line, activePromptLine);
+  activePromptLine = null;
+  activePromptInput = null;
+}
+
+function normalizePath(path) {
+  return path.replace(/\//g, "\\").replace(/\\\\+/g, "\\");
+}
+
+function resolvePath(input) {
+  const target = normalizePath((input || "").trim());
+  if (!target) return currentPath;
+  let working;
+  if (/^[a-zA-Z]:\\/.test(target)) {
+    working = target;
+  } else if (target === "\\") {
+    working = "C:\\";
+  } else if (target.startsWith("\\")) {
+    working = "C:" + target;
+  } else {
+    working = currentPath + "\\" + target;
+  }
+  const driveMatch = working.match(/^[a-zA-Z]:/);
+  const drive = driveMatch ? driveMatch[0] : "C:";
+  const tail = working.slice(drive.length).split("\\").filter(Boolean);
+  const result = [];
+  for (const part of tail) {
+    if (part === ".") continue;
+    if (part === "..") { result.pop(); continue; }
+    result.push(part);
+  }
+  return result.length ? drive + "\\" + result.join("\\") : drive + "\\";
+}
+
+function getEntry(path) {
+  const normalized = path.endsWith("\\") && path.length > 3 ? path.slice(0, -1) : path;
+  return files[normalized];
+}
+
+function resolveDocPath(relative) {
+  return homeDisplayPath + "\\" + normalizePath(relative);
+}
+
+function markVisited(docKey) {
+  if (docKey) visitedDocs.add(docKey);
+}
+
+function syncVisitedLinks() {
+  viewerContent.querySelectorAll(".doc-inline-link[data-doc], .doc-button[data-doc]").forEach((link) => {
+    const docKey = link.getAttribute("data-doc");
+    link.classList.toggle("visited", visitedDocs.has(docKey));
+  });
+}
+
+function openViewer(entryPath, entry, docKey) {
+  viewerTitle.textContent = entryPath;
+  viewerContent.classList.remove("pdf-viewer");
+  viewer.classList.remove("windowed");
+  markVisited(docKey);
+
+  if (entry.type === "pdf") {
+    viewerContent.classList.add("pdf-viewer");
+    viewerContent.innerHTML = '<iframe src="' + entry.src + '"></iframe>';
+  } else {
+    viewerContent.innerHTML = entry.content;
+    syncVisitedLinks();
+  }
+
+  viewer.classList.add("open");
+}
+
+viewerClose.addEventListener("click", () => {
+  viewer.classList.remove("open");
+});
+
+viewerToggle.addEventListener("click", () => {
+  viewer.classList.toggle("windowed");
+});
+
+const commands = {
+  help() { addLine("ls  cd  cat  pwd  whoami  clear  help"); },
+  ls(args) {
+    const targetPath = resolvePath(args || ".");
+    const entry = getEntry(targetPath);
+    if (!entry || entry.type !== "dir") { addLine("File Not Found"); return; }
+    addLine(entry.children.join("    "));
+  },
+  cd(args) {
+    const targetPath = resolvePath(args || homeDisplayPath);
+    const entry = getEntry(targetPath);
+    if (!entry || entry.type !== "dir") {
+      addLine("The system cannot find the path specified.");
+      return;
+    }
+    currentPath = targetPath;
+  },
+  cat(args) {
+    if (!args) { addLine("The syntax of the command is incorrect."); return; }
+    const targetPath = resolvePath(args);
+    const entry = getEntry(targetPath);
+    if (!entry || (entry.type !== "file" && entry.type !== "pdf")) {
+      addLine("The system cannot find the file specified.");
+      return;
+    }
+    openViewer(targetPath, entry, targetPath.split("\\").pop());
+    addLine("Opening " + args);
+  },
+  pwd() { addLine(currentPath); },
+  whoami() { addLine(displayName); },
+  clear() { output.innerHTML = ""; }
+};
+
+function runCommand(raw) {
+  const command = raw.trim();
+  if (!command) {
+    commitPrompt("");
+    ensurePrompt();
+    updatePrompt();
+    return;
+  }
+  history.unshift(command);
+  if (history.length > 40) history.pop();
+  historyIndex = -1;
+  commitPrompt(command);
+  const parts = command.split(/\s+/);
+  const name = parts[0].toLowerCase();
+  const args = command.slice(parts[0].length).trim();
+  if (commands[name]) {
+    commands[name](args);
+  } else {
+    addLine("'" + name + "' is not recognized as an internal or external command,");
+    addLine("operable program or batch file.");
+  }
+  ensurePrompt();
+  updatePrompt();
+}
+
+viewerContent.addEventListener("click", (event) => {
+  const link = event.target.closest("a");
+  if (!link) return;
+
+  if (link.hasAttribute("data-open-file")) {
+    event.preventDefault();
+    const relative = link.getAttribute("data-open-file");
+    const targetPath = resolveDocPath(relative);
+    const entry = getEntry(targetPath);
+    if (entry) openViewer(targetPath, entry, link.getAttribute("data-doc") || relative.split("\\").pop());
+    return;
+  }
+
+  if ((link.classList.contains("doc-inline-link") || link.classList.contains("doc-button")) && link.href) {
+    const docKey = link.getAttribute("data-doc") || link.href;
+    markVisited(docKey);
+    link.classList.add("visited");
+  }
+});
+
+viewerContent.addEventListener("submit", async (event) => {
+  if (event.target.id !== "contact-form") return;
+  event.preventDefault();
+  const form = event.target;
+  const status = viewerContent.querySelector("#contact-status");
+  const payload = Object.fromEntries(new FormData(form).entries());
+  status.textContent = "Sending...";
+  try {
+    const response = await fetch("/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) throw new Error("send failed");
+    status.textContent = "Message sent successfully.";
+    form.reset();
+  } catch (error) {
+    status.textContent = "Failed to send message.";
+  }
+});
+
+addLine("Microsoft Windows [Version 10.0.19045.6466]");
+addLine("(c) Microsoft Corporation. All rights reserved.");
+addLine("");
+ensurePrompt();
+updatePrompt();
+
+document.addEventListener("keydown", (event) => {
+  if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    buffer += event.key;
+    updateBufferView();
+    return;
+  }
+  if (event.key === "Backspace") {
+    buffer = buffer.slice(0, -1);
+    updateBufferView();
+    return;
+  }
+  if (event.key === "Enter") {
+    runCommand(buffer);
+    buffer = "";
+    updateBufferView();
+    return;
+  }
+  if (event.key === "ArrowUp") {
+    if (historyIndex < history.length - 1) {
+      historyIndex += 1;
+      buffer = history[historyIndex];
+      updateBufferView();
+    }
+    return;
+  }
+  if (event.key === "ArrowDown") {
+    if (historyIndex > 0) {
+      historyIndex -= 1;
+      buffer = history[historyIndex];
+    } else {
+      historyIndex = -1;
+      buffer = "";
+    }
+    updateBufferView();
+  }
+});
+</script>
+</body>
+</html>
